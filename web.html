@@ -1,0 +1,26 @@
+<canvas id="c"></canvas>
+<style>
+    /* убираем границу */
+    body {
+      margin: 0;
+    }
+    /* растягиваем canvas на всю область просмотра */
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+    }
+</style>
+<script id="2d-vertex-shader" type="notjs">
+attribute vec4 a_position;
+void main() {
+  gl_Position = a_position;
+}
+</script>
+<script id="2d-fragment-shader" type="notjs">
+precision mediump float;
+void main() {
+  gl_FragColor = vec4(1, 0, 0.5, 1); // вернёт красновато-фиолетовый
+}
+</script>
+<script src="script.js" charset="utf-8"></script>
