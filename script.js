@@ -1,8 +1,9 @@
 'use strict';
 
+let ratio = 16/9;
 let activeElem = -1;
 let clickElem = -1;
-let gl = document.getElementById('canvas').getContext('webgl');
+let gl = canvas.getContext("webgl");
 let mass = dungeonMapMaker(16, 12, Math.random() * 25 + 20);
 let fpsNode = document.createTextNode("");
 let images = [];
@@ -37,21 +38,21 @@ function init() {
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
-    if (x >= 0.15 && x <= 0.85 && y >= 0.15 && y <= 0.85) {
-      let i = Math.floor(((x - 0.15)/0.7)/(1/16));
-      let j = Math.floor(((y - 0.15)/0.7)/(1/12));
+    if (x >= 0.2 && x <= 0.8 && y >= 0.025 && y <= 0.825) {
+      let i = Math.floor(((x - 0.2)/0.6)/(1/16));
+      let j = Math.floor(((y - 0.025)/0.8)/(1/12));
       activeElem = [i, j];
     } else {
       activeElem = -1;
     }
   };
   document.addEventListener("contextmenu",
-  function(event) {
-    event.preventDefault();
+    function(event) {
+      event.preventDefault();
   });
   document.addEventListener('mousedown',
     function(event) {
-      if (event.which == 3) {
+      if (event.which == 3 && activeElem != -1) {
         let div = document.createElement('div');
         let ul = document.createElement('ul');
         div.className = 'drop-menu';
@@ -76,7 +77,6 @@ function init() {
       } else if (activeElem != -1) {
         clickElem = activeElem;
       }
-
   });
   gl.canvas.onmouseup = function(event) {
     if (clickElem != -1) {
@@ -142,8 +142,9 @@ function StartGame() {
 
   function Draw() {
     var primitiveType = gl.TRIANGLES;
-    var offset = 0;
-    var count = 6;
+    gl.uniform2fv(translationLocation, [0, 0]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[6]);
+    gl.drawArrays(primitiveType, 0, 6);
     mass.forEach(function (item, i) {
       item.forEach(function (value, j) {
       let index;
@@ -156,12 +157,28 @@ function StartGame() {
       } else {
         index = 0;
       }
-      gl.uniform2fv(translationLocation, [-0.7 + j*(1.4/16), 0.6 - i*(1.4/12)]);
+      gl.uniform2fv(translationLocation, [-0.6 + j*(1.2/16), 0.95 - i*(1.2/16)*ratio]);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[index]);
-      gl.drawArrays(primitiveType, offset, count);
+      gl.drawArrays(primitiveType, 6, 6);
     })});
+    gl.enable( gl.BLEND );
+    gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    gl.uniform2fv(translationLocation, [-0.6, 0.95]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[8]);
+    gl.drawArrays(primitiveType, 30, 6);
+    gl.uniform2fv(translationLocation, [-0.55, -0.62]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[4]);
+    gl.drawArrays(primitiveType, 12, 6);
+    gl.disable(gl.BLEND);
+    gl.uniform2fv(translationLocation, [-0.55, -0.75]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[5]);
+    gl.drawArrays(primitiveType, 18, 6);
+    gl.uniform2fv(translationLocation, [-0.9, 0.95]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[7]);
+    gl.drawArrays(primitiveType, 24, 6);
   }
 }
 
 init();
-loadImages(['grass.png', 'wall.png', 'activeGrass.png', 'clickGrass.png'], StartGame);
+loadImages(['grass.jpg', 'wall.jpg', 'activeGrass.jpg', 'clickGrass.jpg','arrow.png',
+ 'lowbar.jpg', 'background.jpg', 'hourglass.png', 'grid.png'], StartGame);
