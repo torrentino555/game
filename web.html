@@ -20,7 +20,8 @@
         padding: 0;
         position: relative;
       }
-      #overlay {
+
+      .fps, .time {
         position: absolute;
         top: 10px;
         left: 10px;
@@ -72,8 +73,11 @@
 <body>
   <div class="container">
     <canvas id="canvas"></canvas>
-    <div id="overlay">
-      <div>FPS: <span id="fps"></span></div>
+    <div class="fps">
+      FPS: <span id="fps"></span>
+    </div>
+    <div class="time">
+      <span id ="time"></span>
     </div>
   </div>
   <script src="utils.js" charset="utf-8"></script>

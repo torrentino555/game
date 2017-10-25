@@ -6,6 +6,7 @@ let clickElem = -1;
 let gl = canvas.getContext("webgl");
 let mass = dungeonMapMaker(16, 12, Math.random() * 25 + 20);
 let fpsNode = document.createTextNode("");
+let timeNode = document.createTextNode("");
 let images = [];
 let time = 0;
 
@@ -84,6 +85,12 @@ function init() {
     }
   };
   document.getElementById('fps').appendChild(fpsNode);
+  let timeElem = document.getElementById('time');
+  timeElem.appendChild(timeNode);
+  timeElem.style.fontSize = "2.5em";
+  timeElem.parentNode.style.top = "25%";
+  timeElem.parentNode.style.left = "5.7%";
+
 }
 
 function StartGame() {
@@ -115,6 +122,15 @@ function StartGame() {
     var deltaTime = now - time;
     time = now;
     fpsNode.nodeValue = (1/deltaTime).toFixed(0);
+    let minutes = Math.floor(now / 60);
+    if (minutes < 10) {
+      minutes = "0" + minutes;
+    }
+    let seconds = Math.floor(now % 60);
+    if (seconds < 10) {
+      seconds = "0" + seconds;
+    }
+    timeNode.nodeValue = minutes + ":" + seconds;
 
     resize(gl);
     gl.clearColor(0, 0, 0, 0);
@@ -145,19 +161,19 @@ function StartGame() {
     gl.uniform2fv(translationLocation, [0, 0]);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[6]);
     gl.drawArrays(primitiveType, 0, 6);
-    mass.forEach(function (item, i) {
-      item.forEach(function (value, j) {
+    mass.forEach(function (item, j) {
+      item.forEach(function (value, i) {
       let index;
       if (value) {
         index = 1;
-      } else if (clickElem != -1 & i == clickElem[1] && j == clickElem[0]) {
+      } else if (clickElem != -1 && i == clickElem[0] && j == clickElem[1]) {
         index = 3;
-      } else if (activeElem != -1 && i == activeElem[1] && j == activeElem[0]) {
+      } else if (activeElem != -1 && i == activeElem[0] && j == activeElem[1] ) {
         index = 2;
       } else {
         index = 0;
       }
-      gl.uniform2fv(translationLocation, [-0.6 + j*(1.2/16), 0.95 - i*(1.2/16)*ratio]);
+      gl.uniform2fv(translationLocation, [-0.6 + i*(1.2/16), 0.95 - j*(1.2/16)*ratio]);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, images[index]);
       gl.drawArrays(primitiveType, 6, 6);
     })});
