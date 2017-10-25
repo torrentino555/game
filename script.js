@@ -64,7 +64,7 @@ function init() {
         colls.forEach(function(item) {
           let li = document.createElement('li');
           let img = new Image();
-          img.src = item + '.png';
+          img.src = 'icons/' + item + '.png';
           img.style.width = "25px";
           img.style.height = "25px";
           img.style.paddingRight = "5px";
@@ -87,7 +87,6 @@ function init() {
   document.getElementById('fps').appendChild(fpsNode);
   let timeElem = document.getElementById('time');
   timeElem.appendChild(timeNode);
-  timeElem.style.fontSize = "2.5em";
   timeElem.parentNode.style.top = "25%";
   timeElem.parentNode.style.left = "5.7%";
 
@@ -131,6 +130,8 @@ function StartGame() {
       seconds = "0" + seconds;
     }
     timeNode.nodeValue = minutes + ":" + seconds;
+    console.log(Math.floor(100 + 100*gl.canvas.clientWidth/1300) + "%");
+    document.getElementById('time').style.fontSize = gl.canvas.clientWidth/5.3 + "%";
 
     resize(gl);
     gl.clearColor(0, 0, 0, 0);
@@ -196,5 +197,6 @@ function StartGame() {
 }
 
 init();
-loadImages(['grass.jpg', 'wall.jpg', 'activeGrass.jpg', 'clickGrass.jpg','arrow.png',
- 'lowbar.jpg', 'background.jpg', 'hourglass.png', 'grid.png'], StartGame);
+loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg',
+'textures/clickGrass.jpg','textures/arrow.png', 'textures/lowbar.jpg',
+'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png'], StartGame);
