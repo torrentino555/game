@@ -95,6 +95,28 @@ function MoveEntity(index, i, j) {
   }
 }
 
+function Fireball(index1, index2) {
+  let time = performance.now()*0.001;
+  let pT = DrawObjects[index1].translation;
+  let nT = DrawObjects[index2].translation;
+  let deltaT = [nT[0] - pT[0], nT[1] - pT[1]];
+  let timeAnimation = 2;
+  let index = AddDrawObject(pT, images[15], madeRectangle(0, 0, 0.06, -0.06*ratio), true);
+  Build();
+  requestAnimationFrame(AnimationFireball);
+  function AnimationFireball(now) {
+    now *= 0.001;
+    let deltaTime = now - time;
+    DrawObjects[index].texture = images[15 + Math.floor((deltaTime % 1)/(1/31))];
+    if (deltaTime >= timeAnimation) {
+      DrawObjects[index].translation = nT;
+    } else {
+      DrawObjects[index].translation = [pT[0] + deltaT[0]*deltaTime/timeAnimation, pT[1] + deltaT[1]*deltaTime/timeAnimation]
+      requestAnimationFrame(AnimationFireball);
+    }
+  }
+}
+
 function SetEntityCondition(index, condition) {
   DrawObjects[index].texture = texture;
 }
@@ -132,6 +154,7 @@ function ActiveEntity(index, skills) {
       }
     };
 }
+
 
 function loadImage(url, callback) {
   let image = new Image();
@@ -331,7 +354,18 @@ loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg
 'textures/clickGrass.jpg','textures/arrow.png', 'textures/lowbar.jpg',
 'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/thief.png',
 'entity/mage.png', 'entity/priest.png', 'entity/skeleton1.png', 'entity/skeleton2.png',
-'entity/warrior.png'], InitGraphic);
+'entity/warrior.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
+'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',
+'animations/fireball/6.gif', 'animations/fireball/7.gif', 'animations/fireball/8.gif',
+'animations/fireball/9.gif', 'animations/fireball/10.gif', 'animations/fireball/11.gif',
+'animations/fireball/12.gif', 'animations/fireball/13.gif', 'animations/fireball/14.gif',
+'animations/fireball/15.gif', 'animations/fireball/16.gif', 'animations/fireball/17.gif',
+'animations/fireball/18.gif', 'animations/fireball/19.gif', 'animations/fireball/20.gif',
+'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
+'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
+'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
+'animations/fireball/30.gif', 'animations/fireball/31.gif'], InitGraphic);
+
 
 function Game() {
   let entitys = [];
@@ -343,7 +377,7 @@ function Game() {
   gameloop();
 
   function gameloop() {
-    ActiveEntity(entitys[i % 3], ['magic arrow', 'blaster', 'xyiaster', 'move']);
+    ActiveEntity(entitys[i % 3], ['magic arrow', 'blaster', 'fireball', 'move']);
     // console.log(i % 3);
     requestAnimationFrame(kek);
     i++;
@@ -357,6 +391,9 @@ function Game() {
       let action = actionDeque.pop();
       if (action[1] == 'move') {
         MoveEntity(action[0], action[2][0], action[2][1]);
+        gameloop();
+      } else if (action[1] == 'fireball') {
+        Fireball(action[0], 1 + action[2][1]*16 + action[2][0]);
         gameloop();
       } else {
         requestAnimationFrame(kek);
