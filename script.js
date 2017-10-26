@@ -112,13 +112,26 @@ function Fireball(index1, i, j) {
       DeleteEntity(index);
       Build();
       time = now;
+      let obj = [];
       for (let ii = i - 2; ii < i + 3; ii++) {
         for (let jj = j - 2; jj < j + 3; jj++) {
           if (ii >= 0 && ii < 16 && jj >= 0 && jj < 12) {
-            Explosion(ii, jj);
+            obj.push([
+              AddDrawObject(translationOnMap(ii, jj), images[46], madeRectangle(0, 0, 1/16, -(1/16)*ratio), true),
+              ii, jj]);
           }
         }
       }
+      Build();
+      obj.forEach(function(item) {
+        Explosion(item[0], item[1], item[2]);
+      });
+      setTimeout(function(obj) {
+        obj.forEach(function(item) {
+          DeleteEntity(item[0]);
+        });
+        Build();
+      }, 2000, obj);
     } else {
       DrawObjects[index].texture = images[15 + Math.floor((deltaTime % 1)/(1/31))];
       DrawObjects[index].translation = [pT[0] + deltaT[0]*deltaTime/timeAnimation, pT[1] + deltaT[1]*deltaTime/timeAnimation]
@@ -127,21 +140,15 @@ function Fireball(index1, i, j) {
   }
 }
 
-function Explosion(i, j) {
-  let index = AddDrawObject(translationOnMap(i, j), images[46], madeRectangle(0, 0, 1/16, -(1/16)*ratio), true);
+function Explosion(index, i, j) {
   let time = performance.now()*0.001;
   let timeAnimation = 2;
-  Build();
   requestAnimationFrame(AnimationExplosion);
 
   function AnimationExplosion(now) {
     now *= 0.001;
     let deltaTime = now - time;
-    if (deltaTime >= timeAnimation) {
-      DeleteEntity(index);
-      Build();
-    } else {
-      console.log(46 + Math.floor((deltaTime % timeAnimation)/(1/44)));
+    if (deltaTime < timeAnimation) {
       DrawObjects[index].texture = images[46 + Math.floor((deltaTime % 1)/(1/44))];
       requestAnimationFrame(AnimationExplosion);
     }
