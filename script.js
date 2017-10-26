@@ -39,7 +39,7 @@ function madeRectangle(x0, y0, width, height) {
 }
 
 function translationOnMap(i, j) {
-  return [-0.6 + i*(1.2/16), 0.87 - j*(1.2/16)*ratio];
+  return [-0.6 + i*(1.2/16), 0.85 - j*(1.2/16)*ratio];
 }
 
 function AddEntity(i, j, nameTexture) {
@@ -219,7 +219,7 @@ function InitGui() {
   activeElem = [
     AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)), -1, -1];
   clickElem = AddDrawObject([-2, -2], images[3], madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio));
-  AddDrawObject([-0.6, 0.87], images[8], madeRectangle(0, 0, 1.2, -(1.2/16)*12*ratio), true,
+  AddDrawObject([-0.6, 0.85], images[8], madeRectangle(0, 0, 1.2, -(1.2/16)*12*ratio), true,
   madeRectangle(0.008, 0.01, 0.990, 0.992)); // сетка
   AddDrawObject([-0.55, -0.79], images[5], madeRectangle(0, 0, 1.1, -0.2)); // lowbar
   AddDrawObject([-0.63, -0.80], images[4], madeRectangle(0, 0, 0.1, -0.17), true); // стрелочка
@@ -333,7 +333,7 @@ loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg
 
 function Game() {
   let entitys = [];
-  entitys[0] = AddEntity(3, 3,"mage");
+  entitys[0] = AddEntity(3, 3, "mage");
   entitys[1] = AddEntity(5, 6, "warrior");
   entitys[2] = AddEntity(6, 0, "skeleton1");
   Build();
