@@ -95,7 +95,8 @@ function MoveEntity(index, i, j) {
   }
 }
 
-function Fireball(index1, index2) {
+function Fireball(index1, i, j) {
+  let index2 = 1 + j*16 + i;
   let time = performance.now()*0.001;
   let pT = DrawObjects[index1].translation;
   let nT = DrawObjects[index2].translation;
@@ -107,12 +108,42 @@ function Fireball(index1, index2) {
   function AnimationFireball(now) {
     now *= 0.001;
     let deltaTime = now - time;
-    DrawObjects[index].texture = images[15 + Math.floor((deltaTime % 1)/(1/31))];
     if (deltaTime >= timeAnimation) {
-      DrawObjects[index].translation = nT;
+      DeleteEntity(index);
+      Build();
+      time = now;
+      for (let ii = i - 2; ii < i + 3; ii++) {
+        for (let jj = j - 2; jj < j + 3; jj++) {
+          if (ii >= 0 && ii < 16 && jj >= 0 && jj < 12) {
+            Explosion(ii, jj);
+          }
+        }
+      }
     } else {
+      DrawObjects[index].texture = images[15 + Math.floor((deltaTime % 1)/(1/31))];
       DrawObjects[index].translation = [pT[0] + deltaT[0]*deltaTime/timeAnimation, pT[1] + deltaT[1]*deltaTime/timeAnimation]
       requestAnimationFrame(AnimationFireball);
+    }
+  }
+}
+
+function Explosion(i, j) {
+  let index = AddDrawObject(translationOnMap(i, j), images[46], madeRectangle(0, 0, 1/16, -(1/16)*ratio), true);
+  let time = performance.now()*0.001;
+  let timeAnimation = 2;
+  Build();
+  requestAnimationFrame(AnimationExplosion);
+
+  function AnimationExplosion(now) {
+    now *= 0.001;
+    let deltaTime = now - time;
+    if (deltaTime >= timeAnimation) {
+      DeleteEntity(index);
+      Build();
+    } else {
+      console.log(46 + Math.floor((deltaTime % timeAnimation)/(1/44)));
+      DrawObjects[index].texture = images[46 + Math.floor((deltaTime % 1)/(1/44))];
+      requestAnimationFrame(AnimationExplosion);
     }
   }
 }
@@ -122,7 +153,7 @@ function SetEntityCondition(index, condition) {
 }
 
 function DeleteEntity(index) {
-  DrawObjects.splice(index);
+  delete DrawObjects[index];
 }
 
 function ActiveEntity(index, skills) {
@@ -364,7 +395,23 @@ loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg
 'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
 'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
 'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
-'animations/fireball/30.gif', 'animations/fireball/31.gif'], InitGraphic);
+'animations/fireball/30.gif', 'animations/fireball/31.gif', 'animations/explosion/1.gif',
+'animations/explosion/2.gif',
+'animations/explosion/3.gif', 'animations/explosion/4.gif', 'animations/explosion/5.gif',
+'animations/explosion/6.gif', 'animations/explosion/7.gif', 'animations/explosion/8.gif',
+'animations/explosion/9.gif', 'animations/explosion/10.gif', 'animations/explosion/11.gif',
+'animations/explosion/12.gif', 'animations/explosion/13.gif', 'animations/explosion/14.gif',
+'animations/explosion/15.gif', 'animations/explosion/16.gif', 'animations/explosion/17.gif',
+'animations/explosion/18.gif', 'animations/explosion/19.gif', 'animations/explosion/20.gif',
+'animations/explosion/21.gif', 'animations/explosion/22.gif', 'animations/explosion/23.gif',
+'animations/explosion/24.gif', 'animations/explosion/25.gif', 'animations/explosion/26.gif',
+'animations/explosion/27.gif', 'animations/explosion/28.gif', 'animations/explosion/29.gif',
+'animations/explosion/30.gif', 'animations/explosion/31.gif', 'animations/explosion/32.gif',
+'animations/explosion/33.gif',
+'animations/explosion/34.gif', 'animations/explosion/35.gif', 'animations/explosion/36.gif',
+'animations/explosion/37.gif', 'animations/explosion/38.gif', 'animations/explosion/39.gif',
+'animations/explosion/40.gif', 'animations/explosion/41.gif', 'animations/explosion/42.gif',
+'animations/explosion/43.gif', 'animations/explosion/44.gif'], InitGraphic);
 
 
 function Game() {
@@ -393,7 +440,7 @@ function Game() {
         MoveEntity(action[0], action[2][0], action[2][1]);
         gameloop();
       } else if (action[1] == 'fireball') {
-        Fireball(action[0], 1 + action[2][1]*16 + action[2][0]);
+        Fireball(action[0], action[2][0], action[2][1]);
         gameloop();
       } else {
         requestAnimationFrame(kek);
