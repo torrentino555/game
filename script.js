@@ -172,6 +172,8 @@ function InitGlAndEvents() {
       let j = Math.floor(((y - 0.065)/0.8)/(1/12));
       if (map[j][i] == 1) {
         setTranslation(activeElem[0], [-2, -2]);
+        activeElem[1] = -1;
+        activeElem[2] = -1;
       } else if (activeElem[1] == -1 || activeElem[1] != i || activeElem[2] != j) {
         setTranslation(activeElem[0], translationOnMap(i, j));
         activeElem[1] = i;
