@@ -36,7 +36,8 @@ function translationOnMap(i, j) {
   return [-0.6 + i*(1.2/16), 0.85 - j*(1.2/16)*ratio];
 }
 
-function AddEntity(i, j, nameTexture) {
+function  AddEntity(unit) {
+  let nameTexture = unit.class;
   let index;
   switch (nameTexture) {
     case 'thief':
@@ -60,30 +61,53 @@ function AddEntity(i, j, nameTexture) {
     default:
       console.log("ERROR ADDENTITY, NAMETEXTURE NOT FOUND");
   }
-  let t = translationOnMap(i, j);
+  let t = translationOnMap(unit.xpos, unit.ypos);
   t[0] -= 0.008;
   t[1] += (1.2/16)*ratio;
-  return AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2/14, -(1.2/9)*ratio), true);
+  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2/14, -(1.2/9)*ratio), true);
 }
 
-function MoveEntity(index, i, j) {
+function moveTo(TileStart, TileDest) {
+  let obj = DrawObjects[TileStart.unitOnTile.mapId];
   let time = performance.now()*0.001;
-  let pastTranslation = DrawObjects[index].translation;
-  let newTranslation = translationOnMap(i, j);
-  newTranslation[1] += (1.2/16)*ratio;
-  let deltaTranslation = [newTranslation[0] - pastTranslation[0], newTranslation[1] - pastTranslation[1]];
+  let pT = obj.translation;
+  let nT = translationOnMap(TileDest.xpos, TileDest.ypos);
+  nT[1] += (1.2/16)*ratio;
+  let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
   let timeAnimation = 2;
-
   requestAnimationFrame(AnimationMove);
 
   function AnimationMove(now) {
     now *= 0.001;
     let deltaTime = now - time;
     if (deltaTime >= timeAnimation) {
-      DrawObjects[index].translation = newTranslation;
+      obj.translation = nT;
     } else {
-      DrawObjects[index].translation = [pastTranslation[0] + deltaTranslation[0]*deltaTime/timeAnimation,
-        pastTranslation[1] + deltaTranslation[1]*deltaTime/timeAnimation];
+      obj.translation = [pT[0] + deltaTranslation[0]*deltaTime/timeAnimation,
+        pT[1] + deltaTranslation[1]*deltaTime/timeAnimation];
+      requestAnimationFrame(AnimationMove);
+    }
+  }
+}
+
+function MoveEntity(TileStart, TileDest) {
+  let obj = DrawObjects[TileStart.unitOnTile.mapId];
+  let time = performance.now()*0.001;
+  let pT = obj.translation;
+  let nT = translationOnMap(TileDest.xpos, TileDest.ypos);
+  nT[1] += (1.2/16)*ratio;
+  let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
+  let timeAnimation = 2;
+  requestAnimationFrame(AnimationMove);
+
+  function AnimationMove(now) {
+    now *= 0.001;
+    let deltaTime = now - time;
+    if (deltaTime >= timeAnimation) {
+      obj.translation = nT;
+    } else {
+      obj.translation = [pT[0] + deltaTranslation[0]*deltaTime/timeAnimation,
+        pT[1] + deltaTranslation[1]*deltaTime/timeAnimation];
       requestAnimationFrame(AnimationMove);
     }
   }
@@ -157,9 +181,8 @@ function DeleteEntity(index) {
   delete DrawObjects[index];
 }
 
-function ActiveEntity(index, skills) {
+function ActiveEntity(unit) {
   document.onmousedown = function(event) {
-      console.log(index);
       if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
         let div = document.createElement('div');
         dropMenu = div;
@@ -168,14 +191,13 @@ function ActiveEntity(index, skills) {
         div.style.left = event.clientX - 40 + 'px';
         div.style.top = event.clientY - 15 + 'px';
         div.appendChild(ul);
-        skills.forEach(function(item) {
+        unit.skills.forEach(function(item) {
           let li = document.createElement('li');
-          li.innerHTML = item;
+          li.innerHTML = item.name;
           li.onclick = function() {
-            actionDeque.push([index, item, [activeElem[1], activeElem[2]]]);
+            actionDeque.push([unit, item, map[activeElem[2]][activeElem[1]].unitOnTile]);
             dropMenu.remove();
             dropMenu = 0;
-            console.log(actionDeque);
           };
           ul.appendChild(li);
         });
@@ -186,7 +208,6 @@ function ActiveEntity(index, skills) {
       }
     };
 }
-
 
 function loadImage(url, callback) {
   let image = new Image();
@@ -417,38 +438,28 @@ function StartGraphic(callback) {
 }
 
 function Game() {
-  let entitys = [];
-  entitys[0] = AddEntity(3, 3, "mage");
-  entitys[1] = AddEntity(5, 6, "warrior");
-  entitys[2] = AddEntity(6, 0, "skeleton1");
+  let skills = [new Skill(), new Skill()];
+  skills[0].name = 'fireball';
+  skills[1].name = 'move';
+  let units = [new Unit(), new Unit(), new Unit()];
+  map[3][3].unitOnTile = units[0];
+  units[0].class = "mage";
+  units[0].skills = skills;
+  units[0].xpos = 3; units[0].ypos = 3;
+  AddEntity(units[0]);
+  map[6][5].unitOnTile = units[1];
+  units[1].class = "warrior";
+  units[1].skills = skills;
+  units[1].xpos = 5; units[1].ypos = 6;
+  AddEntity(units[1]);
+  map[0][6].unitOnTile = units[2];
+  units[2].class = "skeleton1";
+  units[2].skills = skills;
+  units[2].xpos = 6; units[2].ypos = 0;
+  AddEntity(units[2]);
   Build();
-  let i = 0;
-  gameloop();
-
-  function gameloop() {
-    ActiveEntity(entitys[i % 3], ['magic arrow', 'blaster', 'fireball', 'move']);
-    // console.log(i % 3);
-    requestAnimationFrame(kek);
-    i++;
-  }
-
-  function kek() {
-    // console.log(actionDeque.length);
-    if (actionDeque.length == 0) {
-      requestAnimationFrame(kek);
-    } else {
-      let action = actionDeque.pop();
-      if (action[1] == 'move') {
-        MoveEntity(action[0], action[2][0], action[2][1]);
-        gameloop();
-      } else if (action[1] == 'fireball') {
-        Fireball(action[0], action[2][0], action[2][1]);
-        gameloop();
-      } else {
-        requestAnimationFrame(kek);
-      }
-    }
-  }
+  ActiveEntity(units[0]);
+  moveTo(map[3][3], map[7][7]);
 }
 
 StartGraphic(Game);
