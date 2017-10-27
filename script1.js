@@ -4,7 +4,7 @@ let ratio = 16/9;
 let activeElem;
 let clickElem;
 let gl;
-let map = dungeonMapMaker(16, 12, Math.random() * 25 + 20);
+let map = new DungeonMapMaker().dungeonMapMaker(Math.random() * 25 + 20);
 let fpsNode = document.createTextNode("");
 let timeNode = document.createTextNode("");
 let images = [];
@@ -16,14 +16,8 @@ let dropMenu = 0;
 let time = 0;
 
 function AddDrawObject(translation, texture, vertexs, blend, texCoord) {
-  let DrawObject = {
-    translation: translation,
-    texture: texture,
-    vertexs: vertexs,
-    blend: blend,
-    texCoord: texCoord
-  };
-  DrawObjects.push(DrawObject);
+  let obj = new DrawObject(translation, texture, vertexs, blend, texCoord);
+  DrawObjects.push(obj);
   return DrawObjects.length - 1;
 }
 
@@ -201,12 +195,12 @@ function loadImage(url, callback) {
   return image;
 }
 
-function loadImages(urls, callback) {
+function loadImages(urls, callback, arg) {
   let imagesToLoad = urls.length;
   let onImageLoad = function() {
     imagesToLoad--;
     if (imagesToLoad == 0) {
-      callback();
+      callback(arg);
     }
   };
   for (let i = 0; i < imagesToLoad; i++) {
@@ -231,7 +225,7 @@ function InitGlAndEvents() {
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
       let i = Math.floor(((x - 0.2)/0.6)/(1/16));
       let j = Math.floor(((y - 0.065)/0.8)/(1/12));
-      if (map[j][i] == 1) {
+      if (map[j][i].isWall) {
         setTranslation(activeElem[0], [-2, -2]);
         activeElem[1] = -1;
         activeElem[2] = -1;
@@ -270,7 +264,7 @@ function InitMapAndBackground() {
   let coord = madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio);
   map.forEach(function (item, j) {
     item.forEach(function (value, i) {
-    if (!value) {
+    if (!value.isWall) {
       AddDrawObject(translationOnMap(i, j), images[0], coord);
     } else {
       AddDrawObject(translationOnMap(i, j), images[1], coord);
@@ -379,47 +373,48 @@ function StartGame() {
   }
 }
 
-function InitGraphic() {
+function InitGraphic(callback) {
   InitGlAndEvents();
   InitHtmlObjects();
   InitMapAndBackground();
   InitGui();
   StartGame();
-  Game();
+  callback();
 }
 
-loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg',
-'textures/clickGrass.jpg','textures/arrow.png', 'textures/lowbar.jpg',
-'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/thief.png',
-'entity/mage.png', 'entity/priest.png', 'entity/skeleton1.png', 'entity/skeleton2.png',
-'entity/warrior.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
-'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',
-'animations/fireball/6.gif', 'animations/fireball/7.gif', 'animations/fireball/8.gif',
-'animations/fireball/9.gif', 'animations/fireball/10.gif', 'animations/fireball/11.gif',
-'animations/fireball/12.gif', 'animations/fireball/13.gif', 'animations/fireball/14.gif',
-'animations/fireball/15.gif', 'animations/fireball/16.gif', 'animations/fireball/17.gif',
-'animations/fireball/18.gif', 'animations/fireball/19.gif', 'animations/fireball/20.gif',
-'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
-'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
-'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
-'animations/fireball/30.gif', 'animations/fireball/31.gif', 'animations/explosion/1.gif',
-'animations/explosion/2.gif',
-'animations/explosion/3.gif', 'animations/explosion/4.gif', 'animations/explosion/5.gif',
-'animations/explosion/6.gif', 'animations/explosion/7.gif', 'animations/explosion/8.gif',
-'animations/explosion/9.gif', 'animations/explosion/10.gif', 'animations/explosion/11.gif',
-'animations/explosion/12.gif', 'animations/explosion/13.gif', 'animations/explosion/14.gif',
-'animations/explosion/15.gif', 'animations/explosion/16.gif', 'animations/explosion/17.gif',
-'animations/explosion/18.gif', 'animations/explosion/19.gif', 'animations/explosion/20.gif',
-'animations/explosion/21.gif', 'animations/explosion/22.gif', 'animations/explosion/23.gif',
-'animations/explosion/24.gif', 'animations/explosion/25.gif', 'animations/explosion/26.gif',
-'animations/explosion/27.gif', 'animations/explosion/28.gif', 'animations/explosion/29.gif',
-'animations/explosion/30.gif', 'animations/explosion/31.gif', 'animations/explosion/32.gif',
-'animations/explosion/33.gif',
-'animations/explosion/34.gif', 'animations/explosion/35.gif', 'animations/explosion/36.gif',
-'animations/explosion/37.gif', 'animations/explosion/38.gif', 'animations/explosion/39.gif',
-'animations/explosion/40.gif', 'animations/explosion/41.gif', 'animations/explosion/42.gif',
-'animations/explosion/43.gif', 'animations/explosion/44.gif'], InitGraphic);
-
+function StartGraphic(callback) {
+  loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg',
+  'textures/clickGrass.jpg','textures/arrow.png', 'textures/lowbar.jpg',
+  'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/thief.png',
+  'entity/mage.png', 'entity/priest.png', 'entity/skeleton1.png', 'entity/skeleton2.png',
+  'entity/warrior.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
+  'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',
+  'animations/fireball/6.gif', 'animations/fireball/7.gif', 'animations/fireball/8.gif',
+  'animations/fireball/9.gif', 'animations/fireball/10.gif', 'animations/fireball/11.gif',
+  'animations/fireball/12.gif', 'animations/fireball/13.gif', 'animations/fireball/14.gif',
+  'animations/fireball/15.gif', 'animations/fireball/16.gif', 'animations/fireball/17.gif',
+  'animations/fireball/18.gif', 'animations/fireball/19.gif', 'animations/fireball/20.gif',
+  'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
+  'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
+  'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
+  'animations/fireball/30.gif', 'animations/fireball/31.gif', 'animations/explosion/1.gif',
+  'animations/explosion/2.gif',
+  'animations/explosion/3.gif', 'animations/explosion/4.gif', 'animations/explosion/5.gif',
+  'animations/explosion/6.gif', 'animations/explosion/7.gif', 'animations/explosion/8.gif',
+  'animations/explosion/9.gif', 'animations/explosion/10.gif', 'animations/explosion/11.gif',
+  'animations/explosion/12.gif', 'animations/explosion/13.gif', 'animations/explosion/14.gif',
+  'animations/explosion/15.gif', 'animations/explosion/16.gif', 'animations/explosion/17.gif',
+  'animations/explosion/18.gif', 'animations/explosion/19.gif', 'animations/explosion/20.gif',
+  'animations/explosion/21.gif', 'animations/explosion/22.gif', 'animations/explosion/23.gif',
+  'animations/explosion/24.gif', 'animations/explosion/25.gif', 'animations/explosion/26.gif',
+  'animations/explosion/27.gif', 'animations/explosion/28.gif', 'animations/explosion/29.gif',
+  'animations/explosion/30.gif', 'animations/explosion/31.gif', 'animations/explosion/32.gif',
+  'animations/explosion/33.gif',
+  'animations/explosion/34.gif', 'animations/explosion/35.gif', 'animations/explosion/36.gif',
+  'animations/explosion/37.gif', 'animations/explosion/38.gif', 'animations/explosion/39.gif',
+  'animations/explosion/40.gif', 'animations/explosion/41.gif', 'animations/explosion/42.gif',
+  'animations/explosion/43.gif', 'animations/explosion/44.gif'], InitGraphic, callback);
+}
 
 function Game() {
   let entitys = [];
@@ -455,3 +450,5 @@ function Game() {
     }
   }
 }
+
+StartGraphic(Game);

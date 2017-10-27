@@ -37,3 +37,19 @@ function resize(gl) {
   }
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 }
+
+function madeRectangle(x0, y0, width, height) {
+  return [
+    x0, y0,
+    width, y0,
+    x0, height,
+    x0, height,
+    width, y0,
+    width, height
+  ];
+}
+
+
+function translationOnMap(i, j) {
+  return [-0.6 + i*(1.2/16), 0.85 - j*(1.2/16)*ratio];
+}
