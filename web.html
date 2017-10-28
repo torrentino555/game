@@ -13,6 +13,7 @@
         width: 100vw;
         height: 100vh;
         display: block;
+        position: absolute;
       }
 
       .container {
@@ -72,6 +73,7 @@
 </head>
 <body>
   <div class="container">
+    <canvas id="background"></canvas>
     <canvas id="canvas"></canvas>
     <div class="fps">
       FPS: <span id="fps"></span>
@@ -81,12 +83,18 @@
     </div>
   </div>
   <script src="utils.js" charset="utf-8"></script>
-  <script src="Skill.js" charset="utf-8"></script>
-  <script src="Unit.js" charset="utf-8"></script>
-  <script src="Tile.js" charset="utf-8"></script>
-  <script src="DungeonMapMaker.js" charset="utf-8"></script>
+  <script src="loader.js" charset="utf-8"></script>
+  <script src="background.js" charset="utf-8"></script>
+  <script src="Skill1.js" charset="utf-8"></script>
+  <script src="Unit1.js" charset="utf-8"></script>
+  <script src="Tile1.js" charset="utf-8"></script>
+  <script src="DungeonMapMaker1.js" charset="utf-8"></script>
   <script src="DrawObject.js" charset="utf-8"></script>
+  <script src="GameModule.js" charset="utf-8"></script>
+  <script src="DemoGameModule.js" charset="utf-8"></script>
+  <script src="InitiativeLine.js" charset="utf-8"></script>
   <script src="script1.js" charset="utf-8"></script>
-  <script src="Game.js" charset="utf-8"></script>
+  <script src="Action.js" charset="utf-8"></script>
+  <script src="start.js" charset="utf-8"></script>
 </body>
 </html>

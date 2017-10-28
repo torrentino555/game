@@ -51,5 +51,5 @@ function madeRectangle(x0, y0, width, height) {
 
 
 function translationOnMap(i, j) {
-  return [-0.6 + i*(1.2/16), 0.85 - j*(1.2/16)*(16/9)];
+  return [-0.6 + i*(1.2/16), 0.85 - j*(1.2/16)*16/9];
 }

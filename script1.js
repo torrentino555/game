@@ -1,19 +1,16 @@
 'use strict';
 
-let ratio = 16/9;
+let ratio = 16 / 9;
 let activeElem;
 let clickElem;
 let activeTile;
 let gl;
-let tiledMap = new DungeonMapMaker().dungeonMapMaker(Math.random() * 25 + 20);
-console.log(tiledMap.length);
 let fpsNode = document.createTextNode("");
 let timeNode = document.createTextNode("");
 let images = [];
 let DrawObjects = [];
 let AttribLocations = [];
 let UniformLocations = [];
-let actionDeque = [];
 let dropMenu = 0;
 let time = 0;
 
@@ -34,10 +31,6 @@ function madeRectangle(x0, y0, width, height) {
   ];
 }
 
-function translationOnMap(i, j) {
-  return [-0.6 + j*(1.2/16), 0.85 - i*(1.2/16)*ratio];
-}
-
 function indexUnit(unit) {
   switch (unit.class) {
     case 'warrior':
@@ -52,10 +45,16 @@ function indexUnit(unit) {
     case 'priest':
       return 3;
       break;
+    case 'skeleton1':
+      return 4;
+      break;
+    case 'skeleton2':
+      return 5;
+      break;
   }
 }
 
-function  AddEntity(unit) {
+function AddEntity(unit) {
   let nameTexture = unit.class;
   let index;
   switch (nameTexture) {
@@ -80,19 +79,26 @@ function  AddEntity(unit) {
     default:
       console.log("ERROR ADDENTITY, NAMETEXTURE NOT FOUND");
   }
-  let t = translationOnMap(unit.xpos, unit.ypos);
-  t[0] -= 0.012;
-  t[1] += (1.2/30)*ratio;
-  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2/5, -(1.2/5)*ratio), true);
+  let t = background.translationOnMap(unit.ypos, unit.xpos);
+  t[0] -= 0.018;
+  t[1] += (1.2 / 25) * ratio;
+  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2 / 9, -(1.2 / 9) * ratio), true,
+    madeRectangle(0.25, 0.15, 0.85, 0.80));
 }
+
 
 function moveTo(TileStart, TileDest) {
   let obj = DrawObjects[TileStart.unitOnTile.mapId];
-  let time = performance.now()*0.001;
+  TileDest.unitOnTile = TileStart.unitOnTile;
+  TileDest.unitOnTile.xpos = TileDest.xpos;
+  TileDest.unitOnTile.ypos = TileDest.ypos;
+  TileStart.unitOnTile = null;
+  let time = performance.now() * 0.001;
   let pT = obj.translation;
-  let nT = translationOnMap(TileDest.xpos, TileDest.ypos);
-  nT[0] -= 0.015;
-  nT[1] += (1.2/16)*ratio;
+  let nT = background.translationOnMap(TileDest.ypos, TileDest.xpos);
+  let translationActiveTile = DrawObjects[activeTile].translation;
+  nT[0] -= 0.018;
+  nT[1] += (1.2 / 25) * ratio;
   let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
   let timeAnimation = 2;
   requestAnimationFrame(AnimationMove);
@@ -102,27 +108,51 @@ function moveTo(TileStart, TileDest) {
     let deltaTime = now - time;
     if (deltaTime >= timeAnimation) {
       obj.translation = nT;
-      TileDest.unitOnTile = TileStart.unitOnTile;
-      TileDest.unitOnTile.xpos = TileDest.xpos;
-      TileDest.unitOnTile.ypos = TileDest.ypos;
-      TileStart.unitOnTile = null;
+      if (translationActiveTile == DrawObjects[activeTile].translation) {
+        DrawObjects[activeTile].translation = background.translationOnMap(TileDest.ypos, TileDest.xpos);
+      }
     } else {
-      obj.translation = [pT[0] + deltaTranslation[0]*deltaTime/timeAnimation,
-        pT[1] + deltaTranslation[1]*deltaTime/timeAnimation];
+      obj.translation = [pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
+        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation
+      ];
       requestAnimationFrame(AnimationMove);
     }
   }
 }
 
+function Thunderbolt(TileStart, TileDest) {
+  let time = performance.now() * 0.001;
+  let timeAnimation = 2;
+  let DestT = DrawObjects[TileDest.unitOnTile.mapId].translation;
+  let index = AddDrawObject(background.translationOnMap(TileDest.ypos, TileDest.xpos), images[109], madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
+  Build();
+  requestAnimationFrame(AnimationThunderbolt);
+
+  function AnimationThunderbolt(now) {
+    now *= 0.001;
+    let deltaTime = now - time;
+    if (deltaTime >= timeAnimation) {
+      DeleteEntity(index);
+    } else {
+      let AnimObj = DrawObjects[index];
+      AnimObj.texture = images[109 + Math.floor((deltaTime % 1) / (1 / 44))];
+      requestAnimationFrame(AnimationThunderbolt);
+    }
+  }
+}
+
 function Fireball(TileStart, TileDest) {
-  let time = performance.now()*0.001;
-  let StartT = translationOnMap(TileStart.xpos, TileStart.ypos);
-  let DestT = translationOnMap(TileDest.xpos, TileDest.ypos);
+  let time = performance.now() * 0.001;
+  let StartObj = DrawObjects[TileStart.unitOnTile.mapId];
+  let DestObj = DrawObjects[TileDest.unitOnTile.mapId];
+  let StartT = StartObj.translation;
+  let DestT = DestObj.translation;
   let deltaT = [DestT[0] - StartT[0], DestT[1] - StartT[1]];
   let timeAnimation = 2;
-  let index = AddDrawObject(StartT, images[15], madeRectangle(0, 0, 0.06, -0.06*ratio), true);
+  let index = AddDrawObject(StartT, images[15], madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
   Build();
   requestAnimationFrame(AnimationFireball);
+
   function AnimationFireball(now) {
     now *= 0.001;
     let deltaTime = now - time;
@@ -133,7 +163,7 @@ function Fireball(TileStart, TileDest) {
       for (let ii = TileDest.xpos - 2; ii < TileDest.xpos + 3; ii++) {
         for (let jj = TileDest.ypos - 2; jj < TileDest.ypos + 3; jj++) {
           if (ii >= 0 && ii < 16 && jj >= 0 && jj < 12) {
-            obj.push(AddDrawObject(translationOnMap(jj, ii), images[46], madeRectangle(0, 0, 1/16, -(1/16)*ratio), true));
+            obj.push(AddDrawObject(background.translationOnMap(jj, ii), images[46], madeRectangle(0, 0, 1 / 16, -(1 / 16) * ratio), true));
           }
         }
       }
@@ -147,15 +177,15 @@ function Fireball(TileStart, TileDest) {
       }, 2000, obj);
     } else {
       let AnimObj = DrawObjects[index];
-      AnimObj.texture = images[15 + Math.floor((deltaTime % 1)/(1/31))];
-      AnimObj.translation = [StartT[0] + deltaT[0]*deltaTime/timeAnimation, StartT[1] + deltaT[1]*deltaTime/timeAnimation]
+      AnimObj.texture = images[15 + Math.floor((deltaTime % 1) / (1 / 31))];
+      AnimObj.translation = [StartT[0] + deltaT[0] * deltaTime / timeAnimation, StartT[1] + deltaT[1] * deltaTime / timeAnimation]
       requestAnimationFrame(AnimationFireball);
     }
   }
 }
 
 function Explosion(obj) {
-  let time = performance.now()*0.001;
+  let time = performance.now() * 0.001;
   let timeAnimation = 2;
   requestAnimationFrame(AnimationExplosion);
 
@@ -163,7 +193,7 @@ function Explosion(obj) {
     now *= 0.001;
     let deltaTime = now - time;
     if (deltaTime < timeAnimation) {
-      let texture = images[46 + Math.floor((deltaTime % 1)/(1/44))];
+      let texture = images[46 + Math.floor((deltaTime % 1) / (1 / 44))];
       obj.forEach(function(item) {
         DrawObjects[item].texture = texture;
       });
@@ -177,75 +207,95 @@ function DeleteEntity(index) {
 }
 
 function ActiveEntity(unit) {
-  if (DrawObjects[activeTile].translation[0] == -2) {
-    console.log(DrawObjects[unit.mapId].translation);
-    console.log(unit.xpos, unit.ypos);
-    DrawObjects[activeTile].translation = translationOnMap(unit.xpos, unit.ypos);
-  }
+  DrawObjects[activeTile].translation = background.translationOnMap(unit.ypos, unit.xpos);
   document.onmousedown = function(event) {
-      if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
-        let div = document.createElement('div');
-        dropMenu = div;
-        let ul = document.createElement('ul');
-        div.className = 'drop-menu';
-        div.style.left = event.clientX - 40 + 'px';
-        div.style.top = event.clientY - 15 + 'px';
-        div.appendChild(ul);
-        unit.skills.forEach(function(item) {
-          let li = document.createElement('li');
-          li.innerHTML = item.name;
-          li.onclick = function() {
-            actionDeque.push([unit, item, tiledMap[activeElem[1]][activeElem[2]].unitOnTile]);
-            dropMenu.remove();
-            dropMenu = 0;
-          };
-          ul.appendChild(li);
-        });
-        document.getElementsByClassName('container')[0].appendChild(div);
-      } else if (event.which == 1 && dropMenu != 0 && event.target.tagName != 'LI') {
-        dropMenu.remove();
-        dropMenu = 0;
-      }
-    };
+    if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
+      let div = document.createElement('div');
+      dropMenu = div;
+      let ul = document.createElement('ul');
+      div.className = 'drop-menu';
+      div.style.left = event.clientX - 40 + 'px';
+      div.style.top = event.clientY - 15 + 'px';
+      div.appendChild(ul);
+      unit.skills.forEach(function(item) {
+        let li = document.createElement('li');
+        li.innerHTML = item.name;
+        li.onclick = function() {
+          let action = new Action();
+          action.sender = tiledMap[unit.ypos][unit.xpos];
+          action.target = tiledMap[activeElem[2]][activeElem[1]];
+          action.ability = item;
+          // console.log("actionDeque update:" + action.skill.name);
+          actionDeque.push(action);
+          dropMenu.remove();
+          dropMenu = 0;
+        };
+        ul.appendChild(li);
+      });
+      document.getElementsByClassName('container')[0].appendChild(div);
+    } else if (event.which == 1 && dropMenu != 0 && event.target.tagName != 'LI') {
+      dropMenu.remove();
+      dropMenu = 0;
+    }
+  };
 }
 
 function unitAttack(nameSkill, sender, target) {
   let index = indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3*index];
+  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3 * index];
   setTimeout(function(nameSkill, sender, target) {
-    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3*index];
+    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3 * index];
+    let timer;
     switch (nameSkill) {
-      case 'fireball':
+      case 'Fire ball':
+        timer = 2000;
         Fireball(sender, target);
-        setTimeout(function(sender, target) {
-          // DrawObjects[target.unitOnTile.mapId].texture = images[92];
-          DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
-        }, 2000, sender, target);
+        break;
+      case 'Thunderbolt':
+        timer = 2000;
+        Thunderbolt(sender, target);
+        break;
+      default:
+        timer = 500;
         break;
     }
+    setTimeout(function(sender, target) {
+      // DrawObjects[target.unitOnTile.mapId].texture = images[92];
+      DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
+    }, timer, sender, target);
   }, 500, nameSkill, sender, target);
 }
 
 function unitAttackAndKill(nameSkill, sender, target, DeadUnits) {
-  let index= indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3*index];
+  let index = indexUnit(sender.unitOnTile);
+  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3 * index];
   setTimeout(() => {
-    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3*index];
+    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3 * index];
+    let timer;
     switch (nameSkill) {
-      case 'fireball':
+      case 'Fire ball':
+        timer = 2000;
         Fireball(sender, target);
-        setTimeout(function(sender, target) {
-          // DrawObjects[target.unitOnTile.mapId].texture = images[92];
-          DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
-          DeadUnits.forEach((unit) => {
-            DrawObjects[unit.mapId].texture = images[92 + 3*indexUnit(unit)];
-          });
-        }, 2050, sender, target);
+        break;
+      case 'Thunderbolt':
+        timer = 2000;
+        Thunderbolt(sender, target);
+        break;
+      default:
+        timer = 500;
         break;
     }
+    setTimeout(function(sender, target) {
+      // DrawObjects[target.unitOnTile.mapId].texture = images[92];
+      DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
+      DeadUnits.forEach((unit) => {
+        DrawObjects[unit.mapId].texture = images[92 + 3 * indexUnit(unit)];
+      });
+    }, timer + 50, sender, target);
   }, 500);
 
 }
+
 
 function loadImage(url, callback) {
   let image = new Image();
@@ -254,12 +304,12 @@ function loadImage(url, callback) {
   return image;
 }
 
-function loadImages(urls, callback, arg) {
+function loadImages(urls, callback, arg, context) {
   let imagesToLoad = urls.length;
   let onImageLoad = function() {
     imagesToLoad--;
     if (imagesToLoad == 0) {
-      callback(arg);
+      callback(arg, context);
     }
   };
   for (let i = 0; i < imagesToLoad; i++) {
@@ -273,23 +323,24 @@ function setTranslation(index, x) {
 }
 
 function InitGlAndEvents() {
-  gl = canvas.getContext("webgl");
+  gl = document.getElementById('canvas').getContext("webgl");
+  console.log("Init gl");
   if (!gl) {
     alert('Беда, брат! Твой браузер не поддерживает WebGl, но ты держись :D');
-  return;
+    return;
   }
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
-      let i = Math.floor(((x - 0.2)/0.6)/(1/16));
-      let j = Math.floor(((y - 0.065)/0.8)/(1/12));
+      let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
+      let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       if (tiledMap[j][i].isWall) {
         setTranslation(activeElem[0], [-2, -2]);
         activeElem[1] = -1;
         activeElem[2] = -1;
       } else if (activeElem[1] == -1 || activeElem[1] != i || activeElem[2] != j) {
-        setTranslation(activeElem[0], translationOnMap(j, i));
+        setTranslation(activeElem[0], background.translationOnMap(j, i));
         activeElem[1] = i;
         activeElem[2] = j;
       }
@@ -298,10 +349,10 @@ function InitGlAndEvents() {
       activeElem[1] = -1;
     }
   };
-  document.addEventListener("contextmenu",
-    function(event) {
-      event.preventDefault();
-  });
+  // document.addEventListener("contextmenu",
+  //   function(event) {
+  //     event.preventDefault();
+  //   });
 
   gl.canvas.onmouseup = function(event) {
     if (DrawObjects[clickElem].translation[0] != -2) {
@@ -318,30 +369,17 @@ function InitHtmlObjects() {
   timeElem.parentNode.style.left = "6.3%";
 }
 
-function InitMapAndBackground() {
-  AddDrawObject([0, 0], images[6], madeRectangle(-1, 1, 1, -1));
-  let coord = madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio);
-  tiledMap.forEach(function (item, j) {
-    item.forEach(function (value, i) {
-      console.log(i + " " + j);
-      if (!value.isWall) {
-        AddDrawObject(translationOnMap(i, j), images[0], coord);
-      } else {
-        AddDrawObject(translationOnMap(i, j), images[1], coord);
-      };
-  })});
-}
-
 function InitGui() {
   activeElem = [
-    AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)), -1, -1];
-  clickElem = AddDrawObject([-2, -2], images[3], madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio));
-  activeTile = AddDrawObject([-2, -2], images[102], madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio));
-  AddDrawObject([-0.6, 0.85], images[8], madeRectangle(0, 0, 1.2, -(1.2/16)*12*ratio), true,
-  madeRectangle(0.008, 0.01, 0.990, 0.992)); // сетка
+    AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1
+  ];
+  clickElem = AddDrawObject([-2, -2], images[3], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
+  activeTile = AddDrawObject([-2, -2], images[108], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
+  // AddDrawObject([-0.6, 0.85], images[8], madeRectangle(0, 0, 1.2, -(1.2 / 16) * 12 * ratio), true,
+  //   madeRectangle(0.008, 0.01, 0.990, 0.992)); // сетка
   AddDrawObject([-0.55, -0.79], images[5], madeRectangle(0, 0, 1.1, -0.2)); // lowbar
   AddDrawObject([-0.63, -0.80], images[4], madeRectangle(0, 0, 0.1, -0.17), true); // стрелочка
-  AddDrawObject([-0.9, 0.95], images[7], madeRectangle(0, 0, 0.2, -0.6)); // часы
+  // AddDrawObject([-0.9, 0.95], images[7], madeRectangle(0, 0, 0.2, -0.6)); // часы
 }
 
 function Build() {
@@ -367,12 +405,23 @@ function Build() {
 }
 
 function StartGame() {
-  var program = createProgramWithShaders(gl,
-    [['2d-vertex-shader', gl.VERTEX_SHADER], ['2d-fragment-shader', gl.FRAGMENT_SHADER]]);
+  var program = createProgramWithShaders(gl, [
+    ['2d-vertex-shader', gl.VERTEX_SHADER],
+    ['2d-fragment-shader', gl.FRAGMENT_SHADER]
+  ]);
 
-  AttribLocations.push({name: 'position', location: gl.getAttribLocation(program, 'a_position')});
-  AttribLocations.push({name: 'texCoord', location: gl.getAttribLocation(program, 'a_texcoord')});
-  UniformLocations.push({name: 'translation', location: gl.getUniformLocation(program, 'u_translation')});
+  AttribLocations.push({
+    name: 'position',
+    location: gl.getAttribLocation(program, 'a_position')
+  });
+  AttribLocations.push({
+    name: 'texCoord',
+    location: gl.getAttribLocation(program, 'a_texcoord')
+  });
+  UniformLocations.push({
+    name: 'translation',
+    location: gl.getUniformLocation(program, 'u_translation')
+  });
 
   Build();
 
@@ -389,7 +438,7 @@ function StartGame() {
     now *= 0.001;
     var deltaTime = now - time;
     time = now;
-    fpsNode.nodeValue = (1/deltaTime).toFixed(0);
+    fpsNode.nodeValue = (1 / deltaTime).toFixed(0);
 
     resize(gl);
     gl.clearColor(0, 0, 0, 0);
@@ -411,8 +460,8 @@ function StartGame() {
     let offset = 0;
     DrawObjects.forEach(function(obj, i) {
       if (obj.blend) {
-        gl.enable( gl.BLEND );
-        gl.blendFunc( gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       } else {
         gl.disable(gl.BLEND);
       }
@@ -424,52 +473,75 @@ function StartGame() {
   }
 }
 
-function InitGraphic(callback) {
+function InitGraphic(callback, context) {
+  console.log("Start init");
   InitGlAndEvents();
   InitHtmlObjects();
-  InitMapAndBackground();
   InitGui();
   StartGame();
-  callback();
+  callback(context);
 }
 
-function StartGraphic(callback) {
+function StartGraphic(callback, context) {
+  console.log("StartGraphic");
   loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg',
-  'textures/clickGrass.jpg','textures/arrow.png', 'textures/lowbar.jpg',
-  'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/warrior.png',
-  'entity/mage.png', 'entity/thief.png', 'entity/priest.png', 'entity/skeleton2.png',
-  'entity/skeleton1.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
-  'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',
-  'animations/fireball/6.gif', 'animations/fireball/7.gif', 'animations/fireball/8.gif',
-  'animations/fireball/9.gif', 'animations/fireball/10.gif', 'animations/fireball/11.gif',
-  'animations/fireball/12.gif', 'animations/fireball/13.gif', 'animations/fireball/14.gif',
-  'animations/fireball/15.gif', 'animations/fireball/16.gif', 'animations/fireball/17.gif',
-  'animations/fireball/18.gif', 'animations/fireball/19.gif', 'animations/fireball/20.gif',
-  'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
-  'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
-  'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
-  'animations/fireball/30.gif', 'animations/fireball/31.gif', 'animations/explosion/1.gif',
-  'animations/explosion/2.gif',
-  'animations/explosion/3.gif', 'animations/explosion/4.gif', 'animations/explosion/5.gif',
-  'animations/explosion/6.gif', 'animations/explosion/7.gif', 'animations/explosion/8.gif',
-  'animations/explosion/9.gif', 'animations/explosion/10.gif', 'animations/explosion/11.gif',
-  'animations/explosion/12.gif', 'animations/explosion/13.gif', 'animations/explosion/14.gif',
-  'animations/explosion/15.gif', 'animations/explosion/16.gif', 'animations/explosion/17.gif',
-  'animations/explosion/18.gif', 'animations/explosion/19.gif', 'animations/explosion/20.gif',
-  'animations/explosion/21.gif', 'animations/explosion/22.gif', 'animations/explosion/23.gif',
-  'animations/explosion/24.gif', 'animations/explosion/25.gif', 'animations/explosion/26.gif',
-  'animations/explosion/27.gif', 'animations/explosion/28.gif', 'animations/explosion/29.gif',
-  'animations/explosion/30.gif', 'animations/explosion/31.gif', 'animations/explosion/32.gif',
-  'animations/explosion/33.gif',
-  'animations/explosion/34.gif', 'animations/explosion/35.gif', 'animations/explosion/36.gif',
-  'animations/explosion/37.gif', 'animations/explosion/38.gif', 'animations/explosion/39.gif',
-  'animations/explosion/40.gif', 'animations/explosion/41.gif', 'animations/explosion/42.gif',
-  'animations/explosion/43.gif', 'animations/explosion/44.gif', 'conditions/WarriorAngry.png',
-  'conditions/WarriorAttack.png', 'conditions/WarriorDead.png',
-  'conditions/MageAngry.png',
-  'conditions/MageAttack.png', 'conditions/MageDead.png',
-  'conditions/ThiefAngry.png',
-  'conditions/ThiefAttack.png', 'conditions/ThiefDead.png',
-  'conditions/PriestAngry.png',
-  'conditions/PriestAttack.png', 'conditions/PriestDead.png', 'textures/activeTile.png'], InitGraphic, callback);
+    'textures/clickGrass.jpg', 'textures/arrow.png', 'textures/lowbar.jpg',
+    'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/warrior.png',
+    'entity/mage.png', 'entity/thief.png', 'entity/priest.png', 'entity/skeleton2.png',
+    'entity/skeleton1.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
+    'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',
+    'animations/fireball/6.gif', 'animations/fireball/7.gif', 'animations/fireball/8.gif',
+    'animations/fireball/9.gif', 'animations/fireball/10.gif', 'animations/fireball/11.gif',
+    'animations/fireball/12.gif', 'animations/fireball/13.gif', 'animations/fireball/14.gif',
+    'animations/fireball/15.gif', 'animations/fireball/16.gif', 'animations/fireball/17.gif',
+    'animations/fireball/18.gif', 'animations/fireball/19.gif', 'animations/fireball/20.gif',
+    'animations/fireball/21.gif', 'animations/fireball/22.gif', 'animations/fireball/23.gif',
+    'animations/fireball/24.gif', 'animations/fireball/25.gif', 'animations/fireball/26.gif',
+    'animations/fireball/27.gif', 'animations/fireball/28.gif', 'animations/fireball/29.gif',
+    'animations/fireball/30.gif', 'animations/fireball/31.gif', 'animations/explosion/1.gif',
+    'animations/explosion/2.gif',
+    'animations/explosion/3.gif', 'animations/explosion/4.gif', 'animations/explosion/5.gif',
+    'animations/explosion/6.gif', 'animations/explosion/7.gif', 'animations/explosion/8.gif',
+    'animations/explosion/9.gif', 'animations/explosion/10.gif', 'animations/explosion/11.gif',
+    'animations/explosion/12.gif', 'animations/explosion/13.gif', 'animations/explosion/14.gif',
+    'animations/explosion/15.gif', 'animations/explosion/16.gif', 'animations/explosion/17.gif',
+    'animations/explosion/18.gif', 'animations/explosion/19.gif', 'animations/explosion/20.gif',
+    'animations/explosion/21.gif', 'animations/explosion/22.gif', 'animations/explosion/23.gif',
+    'animations/explosion/24.gif', 'animations/explosion/25.gif', 'animations/explosion/26.gif',
+    'animations/explosion/27.gif', 'animations/explosion/28.gif', 'animations/explosion/29.gif',
+    'animations/explosion/30.gif', 'animations/explosion/31.gif', 'animations/explosion/32.gif',
+    'animations/explosion/33.gif',
+    'animations/explosion/34.gif', 'animations/explosion/35.gif', 'animations/explosion/36.gif',
+    'animations/explosion/37.gif', 'animations/explosion/38.gif', 'animations/explosion/39.gif',
+    'animations/explosion/40.gif', 'animations/explosion/41.gif', 'animations/explosion/42.gif',
+    'animations/explosion/43.gif', 'animations/explosion/44.gif', 'conditions/WarriorAngry.png',
+    'conditions/WarriorAttack.png', 'conditions/WarriorDead.png',
+    'conditions/MageAngry.png',
+    'conditions/MageAttack.png', 'conditions/MageDead.png',
+    'conditions/ThiefAngry.png',
+    'conditions/ThiefAttack.png', 'conditions/ThiefDead.png',
+    'conditions/PriestAngry.png',
+    'conditions/PriestAttack.png', 'conditions/PriestDead.png',
+    'conditions/Skeleton1Angry.png',
+    'conditions/Skeleton1Attack.png', 'conditions/Skeleton1Dead.png',
+    'conditions/Skeleton2Angry.png',
+    'conditions/Skeleton2Attack.png', 'conditions/Skeleton2Dead.png', 'textures/activeTile.png',
+    'animations/thunderbolt/1.gif',
+    'animations/thunderbolt/2.gif',
+    'animations/thunderbolt/3.gif', 'animations/thunderbolt/4.gif', 'animations/thunderbolt/5.gif',
+    'animations/thunderbolt/6.gif', 'animations/thunderbolt/7.gif', 'animations/thunderbolt/8.gif',
+    'animations/thunderbolt/9.gif', 'animations/thunderbolt/10.gif', 'animations/thunderbolt/11.gif',
+    'animations/thunderbolt/12.gif', 'animations/thunderbolt/13.gif', 'animations/thunderbolt/14.gif',
+    'animations/thunderbolt/15.gif', 'animations/thunderbolt/16.gif', 'animations/thunderbolt/17.gif',
+    'animations/thunderbolt/18.gif', 'animations/thunderbolt/19.gif', 'animations/thunderbolt/20.gif',
+    'animations/thunderbolt/21.gif', 'animations/thunderbolt/22.gif', 'animations/thunderbolt/23.gif',
+    'animations/thunderbolt/24.gif', 'animations/thunderbolt/25.gif', 'animations/thunderbolt/26.gif',
+    'animations/thunderbolt/27.gif', 'animations/thunderbolt/28.gif', 'animations/thunderbolt/29.gif',
+    'animations/thunderbolt/30.gif', 'animations/thunderbolt/31.gif', 'animations/thunderbolt/32.gif',
+    'animations/thunderbolt/33.gif',
+    'animations/thunderbolt/34.gif', 'animations/thunderbolt/35.gif', 'animations/thunderbolt/36.gif',
+    'animations/thunderbolt/37.gif', 'animations/thunderbolt/38.gif', 'animations/thunderbolt/39.gif',
+    'animations/thunderbolt/40.gif', 'animations/thunderbolt/41.gif', 'animations/thunderbolt/42.gif',
+    'animations/thunderbolt/43.gif', 'animations/thunderbolt/44.gif'
+  ], InitGraphic, callback, context);
 }
