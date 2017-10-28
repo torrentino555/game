@@ -45,17 +45,13 @@ class Graphic {
     let onImageLoad = function() {
       imagesToLoad--;
       if (imagesToLoad == 0) {
-        this.kek(arg);
+        this.InitGr(arg);
       }
-    };
+    }.bind(this);
     for (let i = 0; i < imagesToLoad; i++) {
       let image = this.loadImage(urls[i], onImageLoad);
       this.images.push(image);
     }
-  }
-
-  kek() {
-    console.log('kekeke');
   }
 
   AddDrawObject(translation, texture, vertexs, blend, texCoord) {
@@ -200,15 +196,15 @@ class Graphic {
               this.actionDeque.push([unit, item, this.map[this.activeElem[2]][this.activeElem[1]].unitOnTile]);
               this.dropMenu.remove();
               this.dropMenu = 0;
-            };
+            }.bind(this);
             ul.appendChild(li);
-          });
+          }.bind(this));
           document.getElementsByClassName('container')[0].appendChild(div);
         } else if (event.which == 1 && this.dropMenu != 0 && event.target.tagName != 'LI') {
           this.dropMenu.remove();
           this.dropMenu = 0;
         }
-      };
+      }.bind(this);
   }
 
   SetTranslation(index, x) {
@@ -240,7 +236,7 @@ class Graphic {
         this.SetTranslation(this.activeElem[0], [-2, -2]);
         this.activeElem[1] = -1;
       }
-    };
+    }.bind(this);
     document.addEventListener("contextmenu",
       function(event) {
         event.preventDefault();
@@ -250,7 +246,7 @@ class Graphic {
       if (this.DrawObjects[this.clickElem].translation[0] != -2) {
         this.SetTranslation(this.clickElem, [-2, -2]);
       }
-    };
+    }.bind(this);
   }
 
   InitHtmlObjects() {
@@ -267,11 +263,11 @@ class Graphic {
     this.map.forEach(function (item, j) {
       item.forEach(function (value, i) {
         if (!value.isWall) {
-          AddDrawObject(translationOnMap(i, j), images[0], coord);
+          this.AddDrawObject(translationOnMap(i, j), this.images[0], coord);
         } else {
-          AddDrawObject(translationOnMap(i, j), images[1], coord);
+          this.AddDrawObject(translationOnMap(i, j), this.images[1], coord);
       };
-    })});
+    }.bind(this))}.bind(this));
   }
 
   InitGui() {
@@ -305,7 +301,7 @@ class Graphic {
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
     this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
 
-    requestAnimationFrame(DrawScene);
+    requestAnimationFrame(DrawScene.bind(this));
 
     function DrawScene(now) {
       now *= 0.001;
@@ -333,13 +329,14 @@ class Graphic {
         this.gl.enableVertexAttribArray(obj.location);
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, obj.buffer);
         this.gl.vertexAttribPointer(obj.location, 2, this.gl.FLOAT, false, 0, 0);
-      });
+      }.bind(this));
 
       this.Draw();
-      requestAnimationFrame(DrawScene);
+      requestAnimationFrame(DrawScene.bind(this));
     }
+  }
 
-    function Draw() {
+    Draw() {
       let offset = 0;
       this.DrawObjects.forEach(function(obj, i) {
         if (obj.blend) {
@@ -352,9 +349,8 @@ class Graphic {
         this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, obj.texture);
         this.gl.drawArrays(this.gl.TRIANGLES, offset, 6);
         offset += 6;
-      });
+      }.bind(this));
     }
-  }
 
   Build() {
     let defTexCoord = madeRectangle(0, 0, 1, 1);
@@ -376,7 +372,7 @@ class Graphic {
       obj.buffer = this.gl.createBuffer();
       this.gl.bindBuffer(this.gl.ARRAY_BUFFER, obj.buffer);
       this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(obj.coord), this.gl.STATIC_DRAW);
-    });
+    }.bind(this));
   }
 
   Init(callback) {
@@ -441,27 +437,27 @@ function Game() {
   graphic.Build();
   let i = 0;
   gameloop();
-  //
-  // function gameloop() {
-  //   graphic.ActiveEntity(units[i % 3]);
-  //   requestAnimationFrame(kek);
-  //   i++;
-  // }
-  //
-  // function kek() {
-  //   if (actionDeque.length == 0) {
-  //     requestAnimationFrame(kek);
-  //   } else {
-  //     let action = actionDeque.pop();
-  //     if (action[1] == 'move') {
-  //       MoveEntity(map[action[0].xpos][action[0].ypos], map[action[2].xpos][action[2].ypos]);
-  //       gameloop();
-  //     } else if (action[1] == 'fireball') {
-  //       Fireball(map[action[0].xpos][action[0].ypos], map[action[2].xpos][action[2].ypos]);
-  //       gameloop();
-  //     } else {
-  //       requestAnimationFrame(kek);
-  //     }
-  //   }
-  // }
+
+  function gameloop() {
+    graphic.ActiveEntity(units[i % 3]);
+    requestAnimationFrame(kek);
+    i++;
+  }
+
+  function kek() {
+    if (graphic.actionDeque.length == 0) {
+      requestAnimationFrame(kek);
+    } else {
+      let action = graphic.actionDeque.pop();
+      if (action[1] == 'move') {
+        graphic.MoveEntity(graphic.map[action[0].xpos][action[0].ypos], graphic.map[action[2].xpos][action[2].ypos]);
+        gameloop();
+      } else if (action[1] == 'fireball') {
+        graphic.Fireball(graphic.map[action[0].xpos][action[0].ypos], graphic.map[action[2].xpos][action[2].ypos]);
+        gameloop();
+      } else {
+        requestAnimationFrame(kek);
+      }
+    }
+  }
 }

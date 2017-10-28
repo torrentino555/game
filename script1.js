@@ -5,7 +5,8 @@ let activeElem;
 let clickElem;
 let activeTile;
 let gl;
-let map = new DungeonMapMaker().dungeonMapMaker(Math.random() * 25 + 20);
+let tiledMap = new DungeonMapMaker().dungeonMapMaker(Math.random() * 25 + 20);
+console.log(tiledMap.length);
 let fpsNode = document.createTextNode("");
 let timeNode = document.createTextNode("");
 let images = [];
@@ -80,10 +81,9 @@ function  AddEntity(unit) {
       console.log("ERROR ADDENTITY, NAMETEXTURE NOT FOUND");
   }
   let t = translationOnMap(unit.xpos, unit.ypos);
-  t[0] -= 0.015;
-  t[1] += (1.2/16)*ratio;
-  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2/10, -(1.2/8)*ratio), true,
-  madeRectangle(0.25, 0.15, 0.85, 0.80));
+  t[0] -= 0.012;
+  t[1] += (1.2/30)*ratio;
+  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2/5, -(1.2/5)*ratio), true);
 }
 
 function moveTo(TileStart, TileDest) {
@@ -102,6 +102,10 @@ function moveTo(TileStart, TileDest) {
     let deltaTime = now - time;
     if (deltaTime >= timeAnimation) {
       obj.translation = nT;
+      TileDest.unitOnTile = TileStart.unitOnTile;
+      TileDest.unitOnTile.xpos = TileDest.xpos;
+      TileDest.unitOnTile.ypos = TileDest.ypos;
+      TileStart.unitOnTile = null;
     } else {
       obj.translation = [pT[0] + deltaTranslation[0]*deltaTime/timeAnimation,
         pT[1] + deltaTranslation[1]*deltaTime/timeAnimation];
@@ -112,10 +116,8 @@ function moveTo(TileStart, TileDest) {
 
 function Fireball(TileStart, TileDest) {
   let time = performance.now()*0.001;
-  let StartObj = DrawObjects[TileStart.unitOnTile.mapId];
-  let DestObj = DrawObjects[TileDest.unitOnTile.mapId];
-  let StartT = StartObj.translation;
-  let DestT = DestObj.translation;
+  let StartT = translationOnMap(TileStart.xpos, TileStart.ypos);
+  let DestT = translationOnMap(TileDest.xpos, TileDest.ypos);
   let deltaT = [DestT[0] - StartT[0], DestT[1] - StartT[1]];
   let timeAnimation = 2;
   let index = AddDrawObject(StartT, images[15], madeRectangle(0, 0, 0.06, -0.06*ratio), true);
@@ -176,7 +178,8 @@ function DeleteEntity(index) {
 
 function ActiveEntity(unit) {
   if (DrawObjects[activeTile].translation[0] == -2) {
-    console.log(DrawObjects[unit.mapId].translation)
+    console.log(DrawObjects[unit.mapId].translation);
+    console.log(unit.xpos, unit.ypos);
     DrawObjects[activeTile].translation = translationOnMap(unit.xpos, unit.ypos);
   }
   document.onmousedown = function(event) {
@@ -192,7 +195,7 @@ function ActiveEntity(unit) {
           let li = document.createElement('li');
           li.innerHTML = item.name;
           li.onclick = function() {
-            actionDeque.push([unit, item, map[activeElem[1]][activeElem[2]].unitOnTile]);
+            actionDeque.push([unit, item, tiledMap[activeElem[1]][activeElem[2]].unitOnTile]);
             dropMenu.remove();
             dropMenu = 0;
           };
@@ -281,7 +284,7 @@ function InitGlAndEvents() {
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
       let i = Math.floor(((x - 0.2)/0.6)/(1/16));
       let j = Math.floor(((y - 0.065)/0.8)/(1/12));
-      if (map[j][i].isWall) {
+      if (tiledMap[j][i].isWall) {
         setTranslation(activeElem[0], [-2, -2]);
         activeElem[1] = -1;
         activeElem[2] = -1;
@@ -318,13 +321,14 @@ function InitHtmlObjects() {
 function InitMapAndBackground() {
   AddDrawObject([0, 0], images[6], madeRectangle(-1, 1, 1, -1));
   let coord = madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio);
-  map.forEach(function (item, i) {
-    item.forEach(function (value, j) {
-    if (!value.isWall) {
-      AddDrawObject(translationOnMap(i, j), images[0], coord);
-    } else {
-      AddDrawObject(translationOnMap(i, j), images[1], coord);
-    };
+  tiledMap.forEach(function (item, j) {
+    item.forEach(function (value, i) {
+      console.log(i + " " + j);
+      if (!value.isWall) {
+        AddDrawObject(translationOnMap(i, j), images[0], coord);
+      } else {
+        AddDrawObject(translationOnMap(i, j), images[1], coord);
+      };
   })});
 }
 
@@ -469,48 +473,3 @@ function StartGraphic(callback) {
   'conditions/PriestAngry.png',
   'conditions/PriestAttack.png', 'conditions/PriestDead.png', 'textures/activeTile.png'], InitGraphic, callback);
 }
-//
-// function Game() {
-//   let skills = [new Skill(), new Skill()];
-//   skills[0].name = 'fireball';
-//   skills[1].name = 'move';
-//   let units = [new Unit(), new Unit(), new Unit(), new Unit()];
-//   map[9][10].unitOnTile = units[0];
-//   map[9][10].xpos = 9;
-//   map[9][10].ypos = 10;
-//   units[0].xpos = 9;
-//   units[0].ypos = 10;
-//   units[0].class = "mage";
-//   units[0].skills = skills;
-//   AddEntity(units[0]);
-//   map[6][5].unitOnTile = units[1];
-//   units[1].class = "warrior";
-//   units[1].skills = skills;
-//   map[6][5].xpos = 6;
-//   map[6][5].ypos = 5;
-//   units[1].xpos = 6;
-//   units[1].ypos = 5;
-//   AddEntity(units[1]);
-//   map[10][9].unitOnTile = units[2];
-//   units[2].class = "thief";
-//   units[2].skills = skills;
-//   map[10][9].xpos = 10;
-//   map[10][9].ypos = 9;
-//   units[2].xpos = 10;
-//   units[2].ypos = 9;
-//   AddEntity(units[2]);
-//   map[10][10].unitOnTile = units[3];
-//   units[3].class = "priest";
-//   units[3].skills = skills;
-//   map[10][10].xpos = 10;
-//   map[10][10].ypos = 10;
-//   units[3].xpos = 10;
-//   units[3].ypos = 10;
-//   AddEntity(units[3]);
-//   Build();
-//   ActiveEntity(units[3]);
-//   unitAttackAndKill('fireball', map[units[1].xpos][units[1].ypos], map[units[3].xpos][units[3].ypos], [units[0], units[2], units[3]]);
-//   // moveTo(map[3][3], map[3][10]);
-// }
-//
-// StartGraphic(Game);
