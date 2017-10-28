@@ -3,7 +3,7 @@
 WIDTH = 16;
 HEIGHT = 12;
 PARTYSIZE = 4;
-ENEMIESSIZE = 1;
+ENEMIESSIZE = 3;
 NOTWALL = 0;
 WALL = 1;
 
@@ -24,7 +24,8 @@ class DemoGameModule {
     this.initiativeLine.PushEveryone(this.players, this.enemies);
     DemoGameModule.setPlayersPositions(this.players);
     DemoGameModule.setEnemiesPositions(this.enemies);
-
+    console.log("Everyone on positions: ");
+    console.log(this.initiativeLine.ShowEveryoneInLine());
     //отрисовка персонажей
     for (let i = 0; i < window.PARTYSIZE; i++) {
       window.AddEntity(this.players[i]);
@@ -36,6 +37,7 @@ class DemoGameModule {
 
     window.Build();
     this.activeUnit = this.initiativeLine.CurrentUnit();
+    console.log(this.activeUnit.name + " - let's start with you!");
     window.ActiveEntity(this.activeUnit);
   }
 
@@ -52,7 +54,7 @@ class DemoGameModule {
         this.activeUnit.actionPoint--;
         let action = window.actionDeque.shift();
         if (action.isMovement() && !action.target.isOccupied()) {
-          console.log("this is move");
+          console.log(action.sender.getInhabitant().name + " make move from [" + action.sender.xpos + "," + action.sender.ypos + "]" + " to [" + action.target.xpos + "," + action.target.ypos + "]");
           let toMove = action.sender.getInhabitant();
           window.moveTo(action.sender, action.target);
           action.sender.unoccupy();
@@ -62,18 +64,22 @@ class DemoGameModule {
         } else if (action.isAbility()) {
           console.log("this is ability: " + action.ability.name);
           if (action.ability.damage[1] < 0) {
+            console.log(action.sender.getInhabitant().name + " make heal to " + action.target.getInhabitant().name);
             console.log("this is heal: " + action.ability.name);
+            console.log("health begin: " + action.target.getInhabitant().healthpoint);
             action.sender.getInhabitant().useHealSkill(action.target.getInhabitant(), action.ability);
+            console.log("health end: " + action.target.getInhabitant().healthpoint);
             window.unitAttack(action.ability.name, action.sender, action.target);
           } else if (action.ability.damage[1] > 0) {
+            console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
             console.log("this is damage: " + action.ability.name);
 						console.log("health begin: " + action.target.getInhabitant().healthpoint);
 						window.unitAttack(action.ability.name, action.sender, action.target);
             action.sender.getInhabitant().useDamageSkill(action.target.getInhabitant(), action.ability);
 						console.log("health end: " + action.target.getInhabitant().healthpoint);
+            
             if (action.target.getInhabitant().isDead()) {
-							console.log("DEAD");
-              //graph.unitAttackAndKill(action.ability.name, sender, target);
+              console.log(action.target.getInhabitant().name + " IS DEAD");
 							unitAttackAndKill(action.ability.name, action.sender, action.target, [action.target.getInhabitant()]);
               this.initiativeLine.RemoveUnit(action.target.getInhabitant());
               //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
@@ -184,7 +190,7 @@ class DemoGameModule {
   }
 
   isPartyDead() {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < PARTYSIZE; i++) {
       if (!this.players[i].isDead()) {
         return false;
       }
@@ -193,7 +199,7 @@ class DemoGameModule {
   }
 
   isEnemiesDead() {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < ENEMIESSIZE; i++) {
       if (!this.enemies[i].isDead()) {
         return false;
       }
@@ -219,6 +225,9 @@ class DemoGameModule {
 
   beginTurn() {
     this.activeUnit = this.initiativeLine.NextUnit();
+    console.log("This turn: ");
+    console.log(this.initiativeLine.ShowEveryoneInLine());
+    console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
     this.activeUnit.actionPoint = 2;
     window.ActiveEntity(this.activeUnit);
     //изменяем LowerBar
