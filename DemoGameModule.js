@@ -92,7 +92,7 @@ class DemoGameModule {
 
       console.log("action point: " + this.activeUnit.actionPoint);
 
-      if (this.activeUnit.actionPoint === 0 || Math.ceil(this.timer / 1000) == 0){
+      if (this.activeUnit.actionPoint === 0 || Math.ceil(this.timer / 1000) == 0 || this.activeUnit.isDead()){
         this.skipAction();
       }
 

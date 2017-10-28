@@ -22,7 +22,14 @@ class InitiativeLine{
 	NextUnit() {
 		let unit = this.queue.shift();
 		this.queue.push(unit);
+		this.SynchronizeLineId();
 		return this.CurrentUnit();
+	}
+
+	SynchronizeLineId(){
+		for(let i = 0; i < this.queue.length; i++) {
+			this.queue[i].lineId = i;
+		}
 	}
 
 	CurrentUnit() {
@@ -30,7 +37,7 @@ class InitiativeLine{
 	}	
 
 	RemoveUnit(unit) {
-		this.queue.splice(this.queue.indexOf(unit), 1);
+		this.queue.splice(unit.lineId, 1);
 	}
 
 	PushEveryone(allies, enemies) {
@@ -43,6 +50,7 @@ class InitiativeLine{
 			this.queue.push(enemies[i]);
 		}
 		this.queue.sort(InitiativeLine.compareUnitsByInitiative);
+		this.SynchronizeLineId();
 	}
 
 	static compareUnitsByInitiative(unit1, unit2){
