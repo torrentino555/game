@@ -9,7 +9,7 @@
 
 	isMovement() {
 		// console.log(this.target + " - target and this.ability - " + this.ability);
-		return this.ability.name == "Move";
+		return this.ability.name === "Move";
 	}
 
 	isSkip() {

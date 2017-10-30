@@ -1,8 +1,9 @@
-tilesWithWalls = 25;
+
+//import Tile from "Tile.js"
+
 WIDTH = 16;
 HEIGHT = 12;
-
-class DungeonMapMaker {
+/* export default*/ class DungeonMapMaker {
     constructor() {
         this.UP = 0;
         this.LEFT = 1;
@@ -29,9 +30,9 @@ class DungeonMapMaker {
 
     dungeonMapMaker(tileWalls) {
         let map = [];
-        for (let i = 0; i < window.HEIGHT; i++) {
+        for (let i = 0; i < window.WIDTH; i++) {
             map[i] = [];
-            for (let j = 0; j < window.WIDTH; j++) {
+            for (let j = 0; j < window.HEIGHT; j++) {
                 let newTile = new Tile();
                 newTile.xpos = i;
                 newTile.ypos = j;
@@ -40,32 +41,30 @@ class DungeonMapMaker {
             }
         }
 
-        let randRow = Math.floor(Math.random() * window.HEIGHT);
-        let randCol = Math.floor(Math.random() * window.WIDTH);
-        let pointer = [randRow, randCol];
-        map[randRow][randCol].isWall = 0;
+        let randY = Math.floor(Math.random() * window.HEIGHT);
+        let randX = Math.floor(Math.random() * window.WIDTH);
+        let pointer = [randX, randY];
+        map[randX][randY].isWall = 0;
         this.counter--;
         let direction;
         while (this.counter > tileWalls) {
             do {
                 direction = Math.floor(Math.random() * 4);
             }
-            while (!this.isDirectionValid(pointer[1], pointer[0], direction));
+            while (!this.isDirectionValid(pointer[0], pointer[1], direction));
 
             switch (direction) {
                 case this.UP:
-                    pointer[0] = pointer[0] - 1;
-                    break;
-                case this.DOWN:
-                    pointer[0] = pointer[0] + 1;
-                    break;
-                case this.LEFT:
                     pointer[1] = pointer[1] - 1;
                     break;
-                case this.RIGHT:
+                case this.DOWN:
                     pointer[1] = pointer[1] + 1;
                     break;
-                default:
+                case this.LEFT:
+                    pointer[0] = pointer[0] - 1;
+                    break;
+                case this.RIGHT:
+                    pointer[0] = pointer[0] + 1;
                     break;
             }
 

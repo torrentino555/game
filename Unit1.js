@@ -19,8 +19,9 @@ class Unit {
     this.type = "enemy"; //enemy player
     this.actionPoint = 2;
     this.mapId = 0;
+    this.lineId = 0;
     this.shooter = false;
-    this.skills[0].createSkill("Move", "Move to this position", "point", 1, 0, 0);
+    this.skills[0].createSkill("Move", "Move to this position", "point", 1, [0,0], 0);
   }
 
 
@@ -29,7 +30,7 @@ class Unit {
     this.class = "warrior";
     this.healthpoint = [150, 150];
     this.armor = 20;
-    this.damage = [20, 25];
+    this.damage = [35, 40];
     this.initiative = 10;
     let attackSkill = new Skill();
     attackSkill.createSkill("Attack", "Deals damage in close combat", "point", 1, this.damage, 0);
@@ -46,7 +47,7 @@ class Unit {
     this.class = "mage";
     this.healthpoint = [100, 100];
     this.armor = 10;
-    this.damage = [25, 30];
+    this.damage = [30, 40];
     this.initiative = 11;
     let attackSkill = new Skill();
     attackSkill.createSkill("Attack", "Deals damage on distance", "point", 1, this.damage, 0);
@@ -64,7 +65,7 @@ class Unit {
     this.class = "thief";
     this.healthpoint = [125, 125];
     this.armor = 15;
-    this.damage = [30, 35];
+    this.damage = [40, 60];
     this.initiative = 12;
     let attackSkill = new Skill();
     attackSkill.createSkill("Attack", "Deals damage in close combat", "point", 1, this.damage, 0);
@@ -81,14 +82,14 @@ class Unit {
     this.class = "priest";
     this.healthpoint = [100, 100];
     this.armor = 10;
-    this.damage = [-5, -15];
+    this.damage = [-20, -30];
     this.initiative = 11;
     let attackSkill = new Skill();
     attackSkill.createSkill("Heal", "Heal with healing power on distance", "point", 1, this.damage, 0);
     let firstSkill = new Skill();
     firstSkill.createSkill("Massive Heal", "Heal all your units in area with 100% healing power", "circle", 1, this.damage, 3);
     let secondSkill = new Skill();
-    secondSkill.createSkill("Holly wrath", "Deal 300% healing power to cursed creatures", "point", 1, [this.damage[0] * 2, this.damage[1] * 2], 2);
+    secondSkill.createSkill("Holly wrath", "Deal 200% healing power to cursed creatures", "point", 1, [this.damage[0] * -2, this.damage[1] * -2], 2);
     this.skills.push(attackSkill, firstSkill, secondSkill);
     this.type = "player";
     this.shooter = true;
@@ -99,7 +100,7 @@ class Unit {
     this.class = textureName;
     this.healthpoint = [150, 150];
     this.armor = 5;
-    this.damage = [15, 20];
+    this.damage = [35, 40];
     this.initiative = 10;
 
     let attackSkill = new Skill();
@@ -129,11 +130,14 @@ class Unit {
     }
 		console.log("Current Damage: " + currentSkillDamage);
 
-    unit.healthpoint[0] -= currentSkillDamage * ((100 - unit.armor) / 100);
+    unit.healthpoint[0] -= Math.floor(currentSkillDamage * ((100 - unit.armor) / 100));
   }
 
   useHealSkill(unit, skill) {
-    unit.healthpoint += (Math.floor(Math.abs((Math.random() * (skill.damage[1] - skill.damage[0]))) + Math.abs(skill.damage[0])));
+    unit.healthpoint[0] += (Math.floor(Math.abs((Math.random() * (skill.damage[1] - skill.damage[0]))) + Math.abs(skill.damage[0])));
+    if (unit.healthpoint[0] > unit.healthpoint[1]) {
+        unit.healthpoint[0] = unit.healthpoint[1];
+    }
   }
 
 
