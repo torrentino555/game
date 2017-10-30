@@ -111,9 +111,9 @@ function moveTo(TileStart, TileDest) {
   TileDest.unitOnTile.ypos = TileDest.ypos;
   TileStart.unitOnTile = null;
   let time = performance.now() * 0.001;
-  let pT = obj.uniforms[0].value;
+  let pT = obj.getTrans();
   let nT = Utils.translationOnMap(TileDest.ypos, TileDest.xpos);
-  let translationActiveTile = DrawObjects[activeTile].uniforms[0].value;
+  let translationActiveTile = DrawObjects[activeTile].getTrans();
   nT[0] -= 0.08;
   nT[1] += (1.2 / 12) * ratio;
   let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
@@ -124,16 +124,16 @@ function moveTo(TileStart, TileDest) {
     now *= 0.001;
     let deltaTime = now - time;
     if (deltaTime >= timeAnimation) {
-      obj.uniforms[0].value = nT;
-      if (translationActiveTile == DrawObjects[activeTile].uniforms[0].value) {
+      obj.setTrans(nT);
+      if (translationActiveTile == DrawObjects[activeTile].getTrans()) {
         obj.uniforms[0].valie = nT;
-        DrawObjects[TileDest.unitOnTile.entity.healthbarId].uniforms[0].value = [nT[0] + 0.083, nT[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio];
-        DrawObjects[activeTile].uniforms[0].value = [nT[0] + 0.08, nT[1] - (1.2/12)*ratio];
+        DrawObjects[TileDest.unitOnTile.entity.healthbarId].setTrans([nT[0] + 0.083, nT[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
+        DrawObjects[activeTile].setTrans([nT[0] + 0.08, nT[1] - (1.2/12)*ratio]);
       }
     } else {
-      obj.uniforms[0].value = [pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
-        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation];
-      DrawObjects[TileDest.unitOnTile.entity.healthbarId].uniforms[0].value = [obj.uniforms[0].value[0] + 0.083, obj.uniforms[0].value[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio];
+      obj.setTrans([pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
+        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation]);
+      DrawObjects[TileDest.unitOnTile.entity.healthbarId].setTrans([obj.getTrans()[0] + 0.083, obj.getTrans()[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
       requestAnimationFrame(AnimationMove);
     }
   }
@@ -142,7 +142,7 @@ function moveTo(TileStart, TileDest) {
 function Thunderbolt(TileStart, TileDest) {
   let time = performance.now() * 0.001;
   let timeAnimation = 2;
-  let DestT = DrawObjects[TileDest.unitOnTile.entity.mapId].uniforms[0].value;
+  let DestT = DrawObjects[TileDest.unitOnTile.entity.mapId].getTrans();
   let index = AddDrawObject(Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[109], madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
   requestAnimationFrame(AnimationThunderbolt);
 
@@ -153,7 +153,7 @@ function Thunderbolt(TileStart, TileDest) {
       DeleteEntity(index);
     } else {
       let AnimObj = DrawObjects[index];
-      AnimObj.texture = images[109 + Math.floor((deltaTime % 1) / (1 / 44))];
+      AnimObj.setTexture(images[109 + Math.floor((deltaTime % 1) / (1 / 44))]);
       requestAnimationFrame(AnimationThunderbolt);
     }
   }
@@ -163,8 +163,8 @@ function Fireball(TileStart, TileDest) {
   let time = performance.now() * 0.001;
   let StartObj = DrawObjects[TileStart.unitOnTile.entity.mapId];
   let DestObj = DrawObjects[TileDest.unitOnTile.entity.mapId];
-  let StartT = StartObj.uniforms[0].value;
-  let DestT = DestObj.uniforms[0].value;
+  let StartT = StartObj.getTrans();
+  let DestT = DestObj.getTrans();
   let deltaT = [DestT[0] +0.018 - StartT[0], DestT[1] - (1.2/25)*ratio - StartT[1]];
   let timeAnimation = 2;
   let index = AddDrawObject(StartT, images[15], madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
@@ -192,8 +192,8 @@ function Fireball(TileStart, TileDest) {
       }, 2000, obj);
     } else {
       let AnimObj = DrawObjects[index];
-      AnimObj.texture = images[15 + Math.floor((deltaTime % 1) / (1 / 31))];
-      AnimObj.uniforms[0].value = [StartT[0] + deltaT[0] * deltaTime / timeAnimation, StartT[1] + deltaT[1] * deltaTime / timeAnimation]
+      AnimObj.setTexture(images[15 + Math.floor((deltaTime % 1) / (1 / 31))]);
+      AnimObj.setTrans([StartT[0] + deltaT[0] * deltaTime / timeAnimation, StartT[1] + deltaT[1] * deltaTime / timeAnimation]);
       requestAnimationFrame(AnimationFireball);
     }
   }
@@ -210,7 +210,7 @@ function Explosion(obj) {
     if (deltaTime < timeAnimation) {
       let texture = images[46 + Math.floor((deltaTime % 1) / (1 / 44))];
       obj.forEach(function(item) {
-        DrawObjects[item].texture = texture;
+        DrawObjects[item].setTexture(texture);
       });
       requestAnimationFrame(AnimationExplosion);
     }
@@ -222,7 +222,7 @@ function DeleteEntity(index) {
 }
 
 function ActiveEntity(unit) {
-  DrawObjects[activeTile].uniforms[0].value = Utils.translationOnMap(unit.ypos, unit.xpos);
+  DrawObjects[activeTile].setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
   document.onmousedown = function(event) {
     if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
       let div = document.createElement('div');
@@ -271,11 +271,12 @@ function ActiveEntity(unit) {
   };
 }
 
-function unitAttack(nameSkill, sender, target) {
+function unitAttack(nameSkill, sender, target, wounded) {
+  console.log(wounded);
   let index = indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.entity.mapId].texture = images[90 + 3 * index];
+  DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[90 + 3 * index]);
   setTimeout(function(nameSkill, sender, target) {
-    DrawObjects[sender.unitOnTile.entity.mapId].texture = images[91 + 3 * index];
+    DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[91 + 3 * index]);
     let timer;
     switch (nameSkill) {
       case 'Fire ball':
@@ -291,22 +292,25 @@ function unitAttack(nameSkill, sender, target) {
         break;
     }
     setTimeout(function(sender, target) {
-      // DrawObjects[target.unitOnTile.entity.mapId].texture = images[92];
-      DrawObjects[sender.unitOnTile.entity.mapId].texture = images[9 + index];
-      if (target.unitOnTile.healthpoint[0] > 0) {
-        DrawObjects[target.unitOnTile.entity.healthbarId].setVertexs(madeRectangle(0, 0, (1.2/16)*(target.unitOnTile.healthpoint[0]/target.unitOnTile.healthpoint[1]) - 0.006, -0.015));
-      } else {
-        DrawObjects[target.unitOnTile.entity.healthbarId].setVertexs(madeRectangle(0, 0, 0, 0));
-      }
+      // DrawObjects[target.unitOnTile.entity.mapId]setTexture(images[92]);
+      DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[9 + index]);
+      wounded.forEach(function(item) {
+        if (item.healthpoint[0] > 0) {
+          DrawObjects[item.entity.healthbarId].setVertexs(madeRectangle(0, 0, (1.2/16)*(item.healthpoint[0]/item.healthpoint[1]) - 0.006, -0.015));
+        } else {
+          DrawObjects[item.entity.healthbarId].setVertexs(madeRectangle(0, 0, 0, 0));
+        }
+      });
     }, timer, sender, target);
   }, 500, nameSkill, sender, target);
 }
 
-function unitAttackAndKill(nameSkill, sender, target, DeadUnits) {
+function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
+  console.log("KILL");
   let index = indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.entity.mapId].texture = images[90 + 3 * index];
+  DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[90 + 3 * index]);
   setTimeout(() => {
-    DrawObjects[sender.unitOnTile.entity.mapId].texture = images[91 + 3 * index];
+    DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[91 + 3 * index]);
     let timer;
     switch (nameSkill) {
       case 'Fire ball':
@@ -322,10 +326,17 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits) {
         break;
     }
     setTimeout(function(sender, target) {
-      // DrawObjects[target.unitOnTile.entity.mapId].texture = images[92];
-      DrawObjects[sender.unitOnTile.entity.mapId].texture = images[9 + index];
+      // DrawObjects[target.unitOnTile.entity.mapId].setTexture(images[92]);
+      DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[9 + index]);
       DeadUnits.forEach((unit) => {
-        DrawObjects[unit.entity.mapId].texture = images[92 + 3 * indexUnit(unit)];
+        DrawObjects[unit.entity.mapId].setTexture(images[92 + 3 * indexUnit(unit)]);
+      });
+      wounded.forEach((unit) => {
+        if (unit.healthpoint[0] > 0) {
+          DrawObjects[unit.entity.healthbarId].setVertexs(madeRectangle(0, 0, (1.2/16)*(unit.healthpoint[0]/unit.healthpoint[1]) - 0.006, -0.015));
+        } else {
+          DrawObjects[unit.entity.healthbarId].setVertexs(madeRectangle(0, 0, 0, 0));
+        }
       });
     }, timer + 50, sender, target);
   }, 500);
@@ -355,7 +366,7 @@ function loadImages(urls, callback, arg, context) {
 }
 
 function setTranslation(index, x) {
-  DrawObjects[index].uniforms[0].value = x;
+  DrawObjects[index].setTrans(x);
 }
 
 function InitGlAndEvents() {
@@ -423,14 +434,16 @@ function StartGame() {
 
     let lastProgram;
     DrawObjects.forEach(function(item) {
-      if (lastProgram == undefined) {
-        gl.useProgram(item.program);
-        lastProgram = item.program;
-      } else if (lastProgram != item.program) {
-        gl.useProgram(item.program);
-        lastProgram = item.program;
-      }
-      item.render();
+      // if (item.needRender) {
+        if (lastProgram == undefined) {
+          gl.useProgram(item.program);
+          lastProgram = item.program;
+        } else if (lastProgram != item.program) {
+          gl.useProgram(item.program);
+          lastProgram = item.program;
+        }
+        item.render();
+      // }
     });
 
     requestAnimationFrame(DrawScene);

@@ -8,6 +8,7 @@ class DrawObject {
     this.blend = blend;
     this.setAttributes();
     this.setUniforms();
+    this.needRender = true;
   }
 
   getLocUnif(uniform) {
@@ -37,6 +38,21 @@ class DrawObject {
     this.attributes[0].data = vertexs;
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.attributes[0].buffer);
     this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.attributes[0].data), this.gl.STATIC_DRAW);
+    this.needRender = true;
+  }
+
+  setTrans(translation) {
+    this.uniforms[0].value = translation;
+    this.needRender = true;
+  }
+
+  getTrans() {
+    return this.uniforms[0].value;
+  }
+
+  setTexture(texture) {
+    this.texture = texture;
+    this.needRender = true;
   }
 
   render() {
@@ -66,6 +82,7 @@ class DrawObject {
     }
 
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.attributes[0].data.length/2);
+    this.needRender = false;
   }
 }
 

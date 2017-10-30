@@ -62,26 +62,67 @@ class DemoGameModule {
           console.log("check on occupy: " + action.target.isOccupied());
         } else if (action.isAbility()) {
           console.log("this is ability: " + action.ability.name);
+          let woundedEnemies = [];
+          let deadEnemies = [];
+          let healedAllies = [];
           if (action.ability.damage[1] < 0) {
             console.log(action.sender.getInhabitant().name + " make heal to " + action.target.getInhabitant().name);
             console.log("this is heal: " + action.ability.name);
             console.log("health begin: " + action.target.getInhabitant().healthpoint);
-            action.sender.getInhabitant().useHealSkill(action.target.getInhabitant(), action.ability);
-            console.log("health end: " + action.target.getInhabitant().healthpoint);
-            window.unitAttack(action.ability.name, action.sender, action.target);
+            //AOE HILL
+            if(action.ability.typeOfArea === "circle") {
+              for(let i = action.sender.xpos-action.ability.area; i < action.ability.area*2+1; i++) {
+                for(let j = action.sender.ypos-action.ability.area; j < action.ability.area*2+1; j++) {
+                  if(i > 0 && j > 0 && i < WIDTH && j < HEIGHT) {
+                    if(tiledMap[i][j].isOccupied() && tiledMap[i][j].getInhabitant().type === action.sender.getInhabitant().type) {
+                      healedAllies.push(tiledMap[i][j].getInhabitant());
+                      action.sender.getInhabitant().useHealSkill(tiledMap[i][j].getInhabitant(), action.ability);
+                    }
+                  }
+
+                }
+              }
+
+            } else {
+              action.sender.getInhabitant().useHealSkill(action.target.getInhabitant(), action.ability);
+              healedAllies.push(action.target.getInhabitant());
+              console.log("health end: " + action.target.getInhabitant().healthpoint);
+              window.unitAttack(action.ability.name, action.sender, action.target, healedAllies);
+            }
           } else if (action.ability.damage[1] > 0) {
             console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
             console.log("this is damage: " + action.ability.name);
 						console.log("health begin: " + action.target.getInhabitant().healthpoint);
-						window.unitAttack(action.ability.name, action.sender, action.target);
-            action.sender.getInhabitant().useDamageSkill(action.target.getInhabitant(), action.ability);
-						console.log("health end: " + action.target.getInhabitant().healthpoint);
+            //AOE DAMAGE
+            if(action.ability.typeOfArea === "circle") {
+              for(let i = action.sender.xpos-action.ability.area; i < action.ability.area*2+1; i++) {
+                for(let j = action.sender.ypos-action.ability.area; j < action.ability.area*2+1; j++) {
+                  if(i > 0 && j > 0 && i < WIDTH && j < HEIGHT) {
+                    if(tiledMap[i][j].isOccupied()) {
+                        woundedEnemies.push(tiledMap[i][j].getInhabitant());
+                        action.sender.getInhabitant().useDamageSkill(tiledMap[i][j].getInhabitant(), action.ability);
+                        if(tiledMap[i][j].getInhabitant().isDead()) {
+                            deadEnemies.push(tiledMap[i][j].getInhabitant());
+                        }
+                    }
+                  }
 
-            if (action.target.getInhabitant().isDead()) {
-              console.log(action.target.getInhabitant().name + " IS DEAD");
-							unitAttackAndKill(action.ability.name, action.sender, action.target, [action.target.getInhabitant()]);
-              this.initiativeLine.RemoveUnit(action.target.getInhabitant());
+                }
+              }
+
+            } else {
+      			action.sender.getInhabitant().useDamageSkill(action.target.getInhabitant(), action.ability);
+                woundedEnemies.push(action.target.getInhabitant());
+                console.log("health end: " + action.target.getInhabitant().healthpoint);
+            }
+
+            if (deadEnemies.length > 0) {
+                console.log(action.target.getInhabitant().name + " IS DEAD");
+				unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
+                this.initiativeLine.RemoveUnit(action.target.getInhabitant());
               //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
+            } else {
+                window.unitAttack(action.ability.name, action.sender, action.target, woundedEnemies);
             }
           }
         } else if (action.isSkip()) {
