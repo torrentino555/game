@@ -71,6 +71,24 @@
       gl_FragColor = texture2D(u_texture, v_texcoord);
   }
   </script>
+  <script id="2d-vertex-shader2" type="notjs">
+    attribute vec2 a_position;
+    uniform vec2 u_translation;
+    uniform vec4 u_color;
+
+    varying vec4 v_color;
+    void main() {
+      gl_Position = vec4(a_position + u_translation, 0, 1);
+      v_color = u_color;
+    }
+  </script>
+  <script id="2d-fragment-shader2" type="notjs">
+    precision mediump float;
+    varying vec4 v_color;
+    void main() {
+      gl_FragColor = v_color;
+    }
+  </script>
 </head>
 <body>
   <div class="container">
@@ -79,11 +97,13 @@
     <div class="fps">
       FPS: <span id="fps"></span>
     </div>
-    <div class="time">
+    <div style="left:6.3%" class="time">
       <span id ="time"></span>
     </div>
   </div>
-  <script src="utils.js" charset="utf-8"></script>
+  <script src="Utils.js" charset="utf-8"></script>
+  <script src="Entity.js" charset="utf-8"></script>
+  <script src="Program.js" charset="utf-8"></script>
   <script src="loader.js" charset="utf-8"></script>
   <script src="background.js" charset="utf-8"></script>
   <script src="Skill1.js" charset="utf-8"></script>

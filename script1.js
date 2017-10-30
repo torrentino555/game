@@ -2,20 +2,34 @@
 
 let ratio = 16 / 9;
 let activeElem;
-let clickElem;
 let activeTile;
 let gl;
 let fpsNode = document.createTextNode("");
-let timeNode = document.createTextNode("");
 let images = [];
 let DrawObjects = [];
-let AttribLocations = [];
-let UniformLocations = [];
 let dropMenu = 0;
-let time = 0;
+let program;
+let program1;
+let tex;
+let lowbar = 0;
+
+function NewAdd(program, translation, texture, vertexs, blend, texCoord) {
+  let attributes = [new Attribute('a_position', vertexs),
+                    new Attribute('a_texcoord', texCoord ? texCoord : Utils.madeRectangle(0, 0, 1, 1))];
+  let uniforms = [new Uniform('u_translation', translation)];
+  let obj = new DrawObject(gl, program, attributes, uniforms, blend, texture);
+  DrawObjects.push(obj);
+  return DrawObjects.length - 1;
+}
 
 function AddDrawObject(translation, texture, vertexs, blend, texCoord) {
-  let obj = new DrawObject(translation, texture, vertexs, blend, texCoord);
+    return NewAdd(program, translation, texture, vertexs, blend, texCoord);
+}
+
+function AddColorObject(translation, vertexs, color, blend) {
+  let attributes = [new Attribute('a_position', vertexs)];
+  let uniforms = [new Uniform('u_translation', translation), new Uniform('u_color', color)];
+  let obj = new DrawObject(gl, program1, attributes, uniforms, blend);
   DrawObjects.push(obj);
   return DrawObjects.length - 1;
 }
@@ -79,26 +93,29 @@ function AddEntity(unit) {
     default:
       console.log("ERROR ADDENTITY, NAMETEXTURE NOT FOUND");
   }
-  let t = background.translationOnMap(unit.ypos, unit.xpos);
-  t[0] -= 0.018;
-  t[1] += (1.2 / 25) * ratio;
-  return unit.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, 1.2 / 9, -(1.2 / 9) * ratio), true,
-    madeRectangle(0.25, 0.15, 0.85, 0.80));
+  unit.entity = new Entity();
+  let t = Utils.translationOnMap(unit.ypos, unit.xpos);
+  t[0] -= 0.08;
+  t[1] += (1.2 / 12) * ratio;
+  unit.entity.lowbarId = AddDrawObject(Utils.transOnLowbar(lowbar++), images[index], madeRectangle(0, 0, 0.1*1.3, -0.2*1.3), true);
+  unit.entity.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, (1.2 / 9)*1.7, -(1.2 / 9) * 1.7 * ratio), true);
+  unit.entity.healthbarId = AddColorObject([t[0] + 0.083, t[1] + (1.2/17)*ratio - (1.2 / 12) * ratio], madeRectangle(0, 0, 1.2/16 - 0.006, -0.015), [250/255, 44/255, 31/255, 1.0]);
 }
 
 
 function moveTo(TileStart, TileDest) {
-  let obj = DrawObjects[TileStart.unitOnTile.mapId];
+  let obj = DrawObjects[TileStart.unitOnTile.entity.mapId];
+  let healthbar = DrawObjects[TileStart.unitOnTile.entity.healthbarId];
   TileDest.unitOnTile = TileStart.unitOnTile;
   TileDest.unitOnTile.xpos = TileDest.xpos;
   TileDest.unitOnTile.ypos = TileDest.ypos;
   TileStart.unitOnTile = null;
   let time = performance.now() * 0.001;
-  let pT = obj.translation;
-  let nT = background.translationOnMap(TileDest.ypos, TileDest.xpos);
-  let translationActiveTile = DrawObjects[activeTile].translation;
-  nT[0] -= 0.018;
-  nT[1] += (1.2 / 25) * ratio;
+  let pT = obj.uniforms[0].value;
+  let nT = Utils.translationOnMap(TileDest.ypos, TileDest.xpos);
+  let translationActiveTile = DrawObjects[activeTile].uniforms[0].value;
+  nT[0] -= 0.08;
+  nT[1] += (1.2 / 12) * ratio;
   let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
   let timeAnimation = 2;
   requestAnimationFrame(AnimationMove);
@@ -107,14 +124,16 @@ function moveTo(TileStart, TileDest) {
     now *= 0.001;
     let deltaTime = now - time;
     if (deltaTime >= timeAnimation) {
-      obj.translation = nT;
-      if (translationActiveTile == DrawObjects[activeTile].translation) {
-        DrawObjects[activeTile].translation = background.translationOnMap(TileDest.ypos, TileDest.xpos);
+      obj.uniforms[0].value = nT;
+      if (translationActiveTile == DrawObjects[activeTile].uniforms[0].value) {
+        obj.uniforms[0].valie = nT;
+        DrawObjects[TileDest.unitOnTile.entity.healthbarId].uniforms[0].value = [nT[0] + 0.083, nT[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio];
+        DrawObjects[activeTile].uniforms[0].value = [nT[0] + 0.08, nT[1] - (1.2/12)*ratio];
       }
     } else {
-      obj.translation = [pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
-        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation
-      ];
+      obj.uniforms[0].value = [pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
+        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation];
+      DrawObjects[TileDest.unitOnTile.entity.healthbarId].uniforms[0].value = [obj.uniforms[0].value[0] + 0.083, obj.uniforms[0].value[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio];
       requestAnimationFrame(AnimationMove);
     }
   }
@@ -123,9 +142,8 @@ function moveTo(TileStart, TileDest) {
 function Thunderbolt(TileStart, TileDest) {
   let time = performance.now() * 0.001;
   let timeAnimation = 2;
-  let DestT = DrawObjects[TileDest.unitOnTile.mapId].translation;
-  let index = AddDrawObject(background.translationOnMap(TileDest.ypos, TileDest.xpos), images[109], madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
-  Build();
+  let DestT = DrawObjects[TileDest.unitOnTile.entity.mapId].uniforms[0].value;
+  let index = AddDrawObject(Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[109], madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
   requestAnimationFrame(AnimationThunderbolt);
 
   function AnimationThunderbolt(now) {
@@ -143,14 +161,13 @@ function Thunderbolt(TileStart, TileDest) {
 
 function Fireball(TileStart, TileDest) {
   let time = performance.now() * 0.001;
-  let StartObj = DrawObjects[TileStart.unitOnTile.mapId];
-  let DestObj = DrawObjects[TileDest.unitOnTile.mapId];
-  let StartT = StartObj.translation;
-  let DestT = DestObj.translation;
-  let deltaT = [DestT[0] - StartT[0], DestT[1] - StartT[1]];
+  let StartObj = DrawObjects[TileStart.unitOnTile.entity.mapId];
+  let DestObj = DrawObjects[TileDest.unitOnTile.entity.mapId];
+  let StartT = StartObj.uniforms[0].value;
+  let DestT = DestObj.uniforms[0].value;
+  let deltaT = [DestT[0] +0.018 - StartT[0], DestT[1] - (1.2/25)*ratio - StartT[1]];
   let timeAnimation = 2;
   let index = AddDrawObject(StartT, images[15], madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
-  Build();
   requestAnimationFrame(AnimationFireball);
 
   function AnimationFireball(now) {
@@ -163,22 +180,20 @@ function Fireball(TileStart, TileDest) {
       for (let ii = TileDest.xpos - 2; ii < TileDest.xpos + 3; ii++) {
         for (let jj = TileDest.ypos - 2; jj < TileDest.ypos + 3; jj++) {
           if (ii >= 0 && ii < 16 && jj >= 0 && jj < 12) {
-            obj.push(AddDrawObject(background.translationOnMap(jj, ii), images[46], madeRectangle(0, 0, 1 / 16, -(1 / 16) * ratio), true));
+            obj.push(AddDrawObject(Utils.translationOnMap(jj, ii), images[46], madeRectangle(0, 0, 1 / 16, -(1 / 16) * ratio), true));
           }
         }
       }
-      Build();
       Explosion(obj);
       setTimeout(function(obj) {
         obj.forEach(function(item) {
           DeleteEntity(item);
         });
-        Build();
       }, 2000, obj);
     } else {
       let AnimObj = DrawObjects[index];
       AnimObj.texture = images[15 + Math.floor((deltaTime % 1) / (1 / 31))];
-      AnimObj.translation = [StartT[0] + deltaT[0] * deltaTime / timeAnimation, StartT[1] + deltaT[1] * deltaTime / timeAnimation]
+      AnimObj.uniforms[0].value = [StartT[0] + deltaT[0] * deltaTime / timeAnimation, StartT[1] + deltaT[1] * deltaTime / timeAnimation]
       requestAnimationFrame(AnimationFireball);
     }
   }
@@ -207,7 +222,7 @@ function DeleteEntity(index) {
 }
 
 function ActiveEntity(unit) {
-  DrawObjects[activeTile].translation = background.translationOnMap(unit.ypos, unit.xpos);
+  DrawObjects[activeTile].uniforms[0].value = Utils.translationOnMap(unit.ypos, unit.xpos);
   document.onmousedown = function(event) {
     if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
       let div = document.createElement('div');
@@ -217,21 +232,37 @@ function ActiveEntity(unit) {
       div.style.left = event.clientX - 40 + 'px';
       div.style.top = event.clientY - 15 + 'px';
       div.appendChild(ul);
-      unit.skills.forEach(function(item) {
+      let elem = tiledMap[activeElem[2]][activeElem[1]];
+      if (elem.isOccupied() && elem.unitOnTile.type != unit.type && !elem.unitOnTile.isDead()) {
+        unit.skills.forEach(function(item, i) {
+          if (i == 0) return;
+          let li = document.createElement('li');
+          li.innerHTML = item.name;
+          li.onclick = function() {
+            let action = new Action();
+            action.sender = tiledMap[unit.ypos][unit.xpos];
+            action.target = tiledMap[activeElem[2]][activeElem[1]];
+            action.ability = item;
+            actionDeque.push(action);
+            dropMenu.remove();
+            dropMenu = 0;
+          };
+          ul.appendChild(li);
+        });
+      } else if (!tiledMap[activeElem[2]][activeElem[1]].isOccupied()){
         let li = document.createElement('li');
-        li.innerHTML = item.name;
+        li.innerHTML = unit.skills[0].name;
         li.onclick = function() {
           let action = new Action();
           action.sender = tiledMap[unit.ypos][unit.xpos];
           action.target = tiledMap[activeElem[2]][activeElem[1]];
-          action.ability = item;
-          // console.log("actionDeque update:" + action.skill.name);
+          action.ability = unit.skills[0];
           actionDeque.push(action);
           dropMenu.remove();
           dropMenu = 0;
         };
         ul.appendChild(li);
-      });
+      }
       document.getElementsByClassName('container')[0].appendChild(div);
     } else if (event.which == 1 && dropMenu != 0 && event.target.tagName != 'LI') {
       dropMenu.remove();
@@ -242,9 +273,9 @@ function ActiveEntity(unit) {
 
 function unitAttack(nameSkill, sender, target) {
   let index = indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3 * index];
+  DrawObjects[sender.unitOnTile.entity.mapId].texture = images[90 + 3 * index];
   setTimeout(function(nameSkill, sender, target) {
-    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3 * index];
+    DrawObjects[sender.unitOnTile.entity.mapId].texture = images[91 + 3 * index];
     let timer;
     switch (nameSkill) {
       case 'Fire ball':
@@ -260,17 +291,22 @@ function unitAttack(nameSkill, sender, target) {
         break;
     }
     setTimeout(function(sender, target) {
-      // DrawObjects[target.unitOnTile.mapId].texture = images[92];
-      DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
+      // DrawObjects[target.unitOnTile.entity.mapId].texture = images[92];
+      DrawObjects[sender.unitOnTile.entity.mapId].texture = images[9 + index];
+      if (target.unitOnTile.healthpoint[0] > 0) {
+        DrawObjects[target.unitOnTile.entity.healthbarId].setVertexs(madeRectangle(0, 0, (1.2/16)*(target.unitOnTile.healthpoint[0]/target.unitOnTile.healthpoint[1]) - 0.006, -0.015));
+      } else {
+        DrawObjects[target.unitOnTile.entity.healthbarId].setVertexs(madeRectangle(0, 0, 0, 0));
+      }
     }, timer, sender, target);
   }, 500, nameSkill, sender, target);
 }
 
 function unitAttackAndKill(nameSkill, sender, target, DeadUnits) {
   let index = indexUnit(sender.unitOnTile);
-  DrawObjects[sender.unitOnTile.mapId].texture = images[90 + 3 * index];
+  DrawObjects[sender.unitOnTile.entity.mapId].texture = images[90 + 3 * index];
   setTimeout(() => {
-    DrawObjects[sender.unitOnTile.mapId].texture = images[91 + 3 * index];
+    DrawObjects[sender.unitOnTile.entity.mapId].texture = images[91 + 3 * index];
     let timer;
     switch (nameSkill) {
       case 'Fire ball':
@@ -286,10 +322,10 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits) {
         break;
     }
     setTimeout(function(sender, target) {
-      // DrawObjects[target.unitOnTile.mapId].texture = images[92];
-      DrawObjects[sender.unitOnTile.mapId].texture = images[9 + index];
+      // DrawObjects[target.unitOnTile.entity.mapId].texture = images[92];
+      DrawObjects[sender.unitOnTile.entity.mapId].texture = images[9 + index];
       DeadUnits.forEach((unit) => {
-        DrawObjects[unit.mapId].texture = images[92 + 3 * indexUnit(unit)];
+        DrawObjects[unit.entity.mapId].texture = images[92 + 3 * indexUnit(unit)];
       });
     }, timer + 50, sender, target);
   }, 500);
@@ -319,7 +355,7 @@ function loadImages(urls, callback, arg, context) {
 }
 
 function setTranslation(index, x) {
-  DrawObjects[index].translation = x;
+  DrawObjects[index].uniforms[0].value = x;
 }
 
 function InitGlAndEvents() {
@@ -329,6 +365,9 @@ function InitGlAndEvents() {
     alert('Беда, брат! Твой браузер не поддерживает WebGl, но ты держись :D');
     return;
   }
+  program = new Program(gl, '2d-vertex-shader', '2d-fragment-shader').create();
+  program1 = new  Program(gl, '2d-vertex-shader2', '2d-fragment-shader2').create()
+  tex = gl.createTexture();
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
@@ -340,7 +379,7 @@ function InitGlAndEvents() {
         activeElem[1] = -1;
         activeElem[2] = -1;
       } else if (activeElem[1] == -1 || activeElem[1] != i || activeElem[2] != j) {
-        setTranslation(activeElem[0], background.translationOnMap(j, i));
+        setTranslation(activeElem[0], Utils.translationOnMap(j, i));
         activeElem[1] = i;
         activeElem[2] = j;
       }
@@ -349,88 +388,20 @@ function InitGlAndEvents() {
       activeElem[1] = -1;
     }
   };
-  // document.addEventListener("contextmenu",
-  //   function(event) {
-  //     event.preventDefault();
-  //   });
-
-  gl.canvas.onmouseup = function(event) {
-    if (DrawObjects[clickElem].translation[0] != -2) {
-      setTranslation(clickElem, [-2, -2]);
-    }
-  };
 }
 
 function InitHtmlObjects() {
   document.getElementById('fps').appendChild(fpsNode);
-  let timeElem = document.getElementById('time');
-  timeElem.appendChild(timeNode);
-  timeElem.parentNode.style.top = "25%";
-  timeElem.parentNode.style.left = "6.3%";
 }
 
 function InitGui() {
-  activeElem = [
-    AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1
-  ];
-  clickElem = AddDrawObject([-2, -2], images[3], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
+  activeElem = [AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1];
   activeTile = AddDrawObject([-2, -2], images[108], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
-  // AddDrawObject([-0.6, 0.85], images[8], madeRectangle(0, 0, 1.2, -(1.2 / 16) * 12 * ratio), true,
-  //   madeRectangle(0.008, 0.01, 0.990, 0.992)); // сетка
   AddDrawObject([-0.55, -0.79], images[5], madeRectangle(0, 0, 1.1, -0.2)); // lowbar
   AddDrawObject([-0.63, -0.80], images[4], madeRectangle(0, 0, 0.1, -0.17), true); // стрелочка
-  // AddDrawObject([-0.9, 0.95], images[7], madeRectangle(0, 0, 0.2, -0.6)); // часы
-}
-
-function Build() {
-  let defTexCoord = madeRectangle(0, 0, 1, 1);
-  let texCoord = [];
-  let vertexs = [];
-  DrawObjects.forEach(function(item) {
-    vertexs = vertexs.concat(item.vertexs);
-    if (item.texCoord) {
-      texCoord = texCoord.concat(item.texCoord);
-    } else {
-      texCoord = texCoord.concat(defTexCoord);
-    }
-  });
-  AttribLocations[0].coord = vertexs;
-  AttribLocations[1].coord = texCoord;
-
-  AttribLocations.forEach(function(obj, i) {
-    obj.buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, obj.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(obj.coord), gl.STATIC_DRAW);
-  });
 }
 
 function StartGame() {
-  var program = createProgramWithShaders(gl, [
-    ['2d-vertex-shader', gl.VERTEX_SHADER],
-    ['2d-fragment-shader', gl.FRAGMENT_SHADER]
-  ]);
-
-  AttribLocations.push({
-    name: 'position',
-    location: gl.getAttribLocation(program, 'a_position')
-  });
-  AttribLocations.push({
-    name: 'texCoord',
-    location: gl.getAttribLocation(program, 'a_texcoord')
-  });
-  UniformLocations.push({
-    name: 'translation',
-    location: gl.getUniformLocation(program, 'u_translation')
-  });
-
-  Build();
-
-  let texture = gl.createTexture();
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
   requestAnimationFrame(DrawScene);
 
@@ -440,36 +411,29 @@ function StartGame() {
     time = now;
     fpsNode.nodeValue = (1 / deltaTime).toFixed(0);
 
-    resize(gl);
+    Utils.resize(gl);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.useProgram(program);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
-    AttribLocations.forEach(function(obj, i) {
-      gl.enableVertexAttribArray(obj.location);
-      gl.bindBuffer(gl.ARRAY_BUFFER, obj.buffer);
-      gl.vertexAttribPointer(obj.location, 2, gl.FLOAT, false, 0, 0);
-    });
-
-    Draw();
-    requestAnimationFrame(DrawScene);
-  }
-
-  function Draw() {
-    let offset = 0;
-    DrawObjects.forEach(function(obj, i) {
-      if (obj.blend) {
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-      } else {
-        gl.disable(gl.BLEND);
+    let lastProgram;
+    DrawObjects.forEach(function(item) {
+      if (lastProgram == undefined) {
+        gl.useProgram(item.program);
+        lastProgram = item.program;
+      } else if (lastProgram != item.program) {
+        gl.useProgram(item.program);
+        lastProgram = item.program;
       }
-      gl.uniform2fv(UniformLocations[0].location, obj.translation);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, obj.texture);
-      gl.drawArrays(gl.TRIANGLES, offset, 6);
-      offset += 6;
+      item.render();
     });
+
+    requestAnimationFrame(DrawScene);
   }
 }
 

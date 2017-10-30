@@ -35,7 +35,6 @@ class DemoGameModule {
       window.AddEntity(this.enemies[i]);
     }
 
-    window.Build();
     this.activeUnit = this.initiativeLine.CurrentUnit();
     console.log(this.activeUnit.name + " - let's start with you!");
     window.ActiveEntity(this.activeUnit);
@@ -77,7 +76,7 @@ class DemoGameModule {
 						window.unitAttack(action.ability.name, action.sender, action.target);
             action.sender.getInhabitant().useDamageSkill(action.target.getInhabitant(), action.ability);
 						console.log("health end: " + action.target.getInhabitant().healthpoint);
-            
+
             if (action.target.getInhabitant().isDead()) {
               console.log(action.target.getInhabitant().name + " IS DEAD");
 							unitAttackAndKill(action.ability.name, action.sender, action.target, [action.target.getInhabitant()]);
