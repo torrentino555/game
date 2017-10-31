@@ -232,36 +232,45 @@ function ActiveEntity(unit) {
       div.style.left = event.clientX - 40 + 'px';
       div.style.top = event.clientY - 15 + 'px';
       div.appendChild(ul);
-      let elem = tiledMap[activeElem[2]][activeElem[1]];
-      if (elem.isOccupied() && elem.unitOnTile.type != unit.type && !elem.unitOnTile.isDead()) {
-        unit.skills.forEach(function(item, i) {
-          if (i == 0) return;
-          let li = document.createElement('li');
-          li.innerHTML = item.name;
-          li.onclick = function() {
-            let action = new Action();
-            action.sender = tiledMap[unit.ypos][unit.xpos];
-            action.target = tiledMap[activeElem[2]][activeElem[1]];
-            action.ability = item;
-            actionDeque.push(action);
-            dropMenu.remove();
-            dropMenu = 0;
-          };
-          ul.appendChild(li);
-        });
-      } else if (!tiledMap[activeElem[2]][activeElem[1]].isOccupied()){
+      let elem = tiledMap[activeElem[1]][activeElem[2]];
+      let x = function(item) {
         let li = document.createElement('li');
-        li.innerHTML = unit.skills[0].name;
+        li.innerHTML = item.name;
         li.onclick = function() {
           let action = new Action();
-          action.sender = tiledMap[unit.ypos][unit.xpos];
-          action.target = tiledMap[activeElem[2]][activeElem[1]];
-          action.ability = unit.skills[0];
+          action.sender = tiledMap[unit.xpos][unit.ypos];
+          action.target = tiledMap[activeElem[1]][activeElem[2]];
+          action.ability = item;
           actionDeque.push(action);
           dropMenu.remove();
           dropMenu = 0;
         };
         ul.appendChild(li);
+      };
+      if (elem.isOccupied() && elem.unitOnTile.type == unit.type) {
+        console.log("Союзник");
+        unit.skills.forEach(function(item, i) {
+          if (item.name != 'Move' && item.typeOfArea == "circle" && item.damage[0] < 0) {
+            console.log(item.name);
+            x(item);
+          }
+        });
+      } else if (elem.isOccupied() && elem.unitOnTile.type != unit.type) {
+        console.log("Противник")
+        unit.skills.forEach(function(item, i) {
+          if (item.name != 'Move' && item.damage[0] > 0) {
+            console.log(item.name);
+            x(item);
+          }
+        });
+      } else {
+        console.log("Карта")
+        unit.skills.forEach(function(item, i) {
+          if (item.typeOfArea == "circle" || item.name == 'Move') {
+            console.log(item.name);
+            x(item);
+          }
+        });
       }
       document.getElementsByClassName('container')[0].appendChild(div);
     } else if (event.which == 1 && dropMenu != 0 && event.target.tagName != 'LI') {
@@ -385,7 +394,7 @@ function InitGlAndEvents() {
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
-      if (tiledMap[j][i].isWall) {
+      if (tiledMap[i][j].isWall) {
         setTranslation(activeElem[0], [-2, -2]);
         activeElem[1] = -1;
         activeElem[2] = -1;

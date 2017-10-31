@@ -34,8 +34,8 @@ class background {
   AddMapAndBackground() {
     this.AddDrawObject([0, 0], this.textures[2], Utils.madeRectangle(-1, 1, 1, -1));
     let coord = Utils.madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * this.ratio);
-    this.tiledMap.forEach(function(item, i) {
-      item.forEach(function(value, j) {
+    this.tiledMap.forEach(function(item, j) {
+      item.forEach(function(value, i) {
         if (value.isWall) {
           this.AddDrawObject(Utils.translationOnMap(i, j), this.textures[0], coord);
         } else {
