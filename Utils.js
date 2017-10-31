@@ -27,6 +27,6 @@ class Utils {
   }
 
   static transOnLowbar(i) {
-    return [-0.55 - 0.015 + i*0.1, -0.79 + 0.005];
+    return [-0.55 + 0.005 + i*0.1, -0.79 - 0.01];
   }
 }
