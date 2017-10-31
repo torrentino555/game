@@ -247,7 +247,11 @@ function DeleteEntity(index) {
 function ActiveEntity(unit) {
   DrawObjects[activeTile].setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
   document.onmousedown = function(event) {
-    if (event.which == 1 && activeElem[1] != -1 && dropMenu == 0) {
+    let x = event.clientX / gl.canvas.clientWidth;
+    let y = event.clientY / gl.canvas.clientHeight;
+    if (event.which == 1 && x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden') && dropMenu == 0) {
+      let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
+      let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       let div = document.createElement('div');
       dropMenu = div;
       let ul = document.createElement('ul');
@@ -255,14 +259,14 @@ function ActiveEntity(unit) {
       div.style.left = event.clientX - 40 + 'px';
       div.style.top = event.clientY - 15 + 'px';
       div.appendChild(ul);
-      let elem = window.tiledMap[activeElem[1]][activeElem[2]];
-      let x = function(item) {
+      let elem = window.tiledMap[i][j];
+      let func = function(item) {
         let li = document.createElement('li');
         li.innerHTML = item.name;
         li.onclick = function() {
           let action = new Action();
           action.sender = window.tiledMap[unit.xpos][unit.ypos];
-          action.target = window.tiledMap[activeElem[1]][activeElem[2]];
+          action.target = window.tiledMap[i][j];
           action.ability = item;
           actionDeque.push(action);
           dropMenu.remove();
@@ -275,7 +279,7 @@ function ActiveEntity(unit) {
         unit.skills.forEach(function(item, i) {
           if (item.name != 'Move' && item.typeOfArea == "circle" && item.damage[0] < 0) {
             console.log(item.name);
-            x(item);
+            func(item);
           }
         });
       } else if (elem.isOccupied() && elem.unitOnTile.type != unit.type) {
@@ -283,7 +287,7 @@ function ActiveEntity(unit) {
         unit.skills.forEach(function(item, i) {
           if (item.name != 'Move' && item.damage[0] > 0) {
             console.log(item.name);
-            x(item);
+            func(item);
           }
         });
       } else {
@@ -291,7 +295,7 @@ function ActiveEntity(unit) {
         unit.skills.forEach(function(item, i) {
           if (item.typeOfArea == "circle" || item.name == 'Move') {
             console.log(item.name);
-            x(item);
+            func(item);
           }
         });
       }
