@@ -53,13 +53,13 @@ class DemoGameModule {
                 this.activeUnit.actionPoint--;
                 let action = window.actionDeque.shift();
                 if (action.isMovement() && !action.target.isOccupied()) {
-                    DemoGameModule.makeMove(action);
+                    this.makeMove(action);
                 } else if (action.isAbility()) {
                     console.log("this is ability: " + action.ability.name);
                     if (action.ability.damage[1] < 0) {
-                        DemoGameModule.makeHill(action);
+                        this.makeHill(action);
                     } else if (action.ability.damage[1] > 0) {
-                        DemoGameModule.makeDamage(action);
+                        this.makeDamage(action);
                     }
                 } else if (action.isSkip()) {
                     this.skipAction();
@@ -85,7 +85,7 @@ class DemoGameModule {
         }
     }
 
-    static makeMove(action) {
+    makeMove(action) {
         console.log(action.sender.getInhabitant().name + " make move from [" + action.sender.xpos + "," + action.sender.ypos + "]" + " to [" + action.target.xpos + "," + action.target.ypos + "]");
         let toMove = action.sender.getInhabitant();
         window.moveTo(action.sender, action.target);
@@ -95,7 +95,7 @@ class DemoGameModule {
         console.log("check on occupy: " + action.target.isOccupied());
     }
 
-    static makeHill(action) {
+    makeHill(action) {
         let healedAllies = [];
         console.log(action.sender.getInhabitant().name + " make heal to " + action.target.getInhabitant().name);
         console.log("this is heal: " + action.ability.name);
@@ -124,7 +124,7 @@ class DemoGameModule {
         window.unitAttack(action.ability.name, action.sender, action.target, healedAllies);
     }
 
-    static makeDamage(action) {
+    makeDamage(action) {
         let woundedEnemies = [];
         let deadEnemies = [];
         console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
