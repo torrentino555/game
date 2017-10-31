@@ -20,9 +20,9 @@ class GameModule {
   }
 
   gameGraphic() {
-    console.log("GameGraphic");
     let back = new background(tiledMap);
     back.render();
+    console.log("GameGraphic");
     window.StartGraphic(this.gameStart, this);
   }
 }

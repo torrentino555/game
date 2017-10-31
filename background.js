@@ -13,12 +13,6 @@ class background {
     this.texture = this.gl.createTexture();
   }
 
-  // AddDrawObject(translation, texture, vertexs, blend, texCoord) {
-  //   let obj = new DrawObject(translation, texture, vertexs, blend, texCoord);
-  //   this.DrawObjects.push(obj);
-  //   return this.DrawObjects.length - 1;
-  // }
-
   NewAdd(program, translation, texture, vertexs, blend, texCoord) {
     let attributes = [new Attribute('a_position', vertexs),
                       new Attribute('a_texcoord', texCoord ? texCoord : Utils.madeRectangle(0, 0, 1, 1))];
@@ -52,7 +46,7 @@ class background {
   }
 
   render() {
-    let Loader = new loader(['textures/wall.jpg', 'textures/grass.jpg', 'textures/background.jpg',
+    let Loader = new loader(['textures/wall.jpg', 'textures/grass.jpg', 'textures/background.png',
       'textures/hourglass.png', 'textures/grid.png']);
     Loader.load(this.onLoad.bind(this));
   }
@@ -69,6 +63,7 @@ class background {
   }
 
   draw() {
+    this.gl.disable(this.gl.DEPTH_TEST);
     let time = performance.now()*0.001;
     Utils.resize(this.gl);
     this.gl.clearColor(0, 0, 0, 0);

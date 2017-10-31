@@ -68,6 +68,29 @@ function indexUnit(unit) {
   }
 }
 
+function imageUnit(unit) {
+  switch (unit.class) {
+    case 'warrior':
+      return 0;
+      break;
+    case 'mage':
+      return 1;
+      break;
+    case 'thief':
+      return 3;
+      break;
+    case 'priest':
+      return 6;
+      break;
+    case 'skeleton1':
+      return 7;
+      break;
+    case 'skeleton2':
+      return 8;
+      break;
+  }
+}
+
 function AddEntity(unit) {
   let nameTexture = unit.class;
   let index;
@@ -97,7 +120,7 @@ function AddEntity(unit) {
   let t = Utils.translationOnMap(unit.ypos, unit.xpos);
   t[0] -= 0.08;
   t[1] += (1.2 / 12) * ratio;
-  unit.entity.lowbarId = AddDrawObject(Utils.transOnLowbar(lowbar++), images[index], madeRectangle(0, 0, 0.1*1.3, -0.2*1.3), true);
+  unit.entity.lowbarId = AddDrawObject(Utils.transOnLowbar(lowbar++), images[imageUnit(unit)], madeRectangle(0, 0, 0.09, -0.09*ratio), true);
   unit.entity.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, (1.2 / 9)*1.7, -(1.2 / 9) * 1.7 * ratio), true);
   unit.entity.healthbarId = AddColorObject([t[0] + 0.083, t[1] + (1.2/17)*ratio - (1.2 / 12) * ratio], madeRectangle(0, 0, 1.2/16 - 0.006, -0.015), [250/255, 44/255, 31/255, 1.0]);
 }
@@ -391,7 +414,7 @@ function InitGlAndEvents() {
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
-    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
+    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden')) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       if (window.tiledMap[i][j].isWall) {
@@ -417,7 +440,7 @@ function InitHtmlObjects() {
 function InitGui() {
   activeElem = [AddDrawObject([-2, -2], images[2], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1];
   activeTile = AddDrawObject([-2, -2], images[108], madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
-  AddDrawObject([-0.55, -0.79], images[5], madeRectangle(0, 0, 1.1, -0.2)); // lowbar
+  AddDrawObject([-0.55, -0.79], images[5], madeRectangle(0, 0, 1.1, -0.1*ratio)); // lowbar
   AddDrawObject([-0.63, -0.80], images[4], madeRectangle(0, 0, 0.1, -0.17), true); // стрелочка
 }
 
@@ -443,7 +466,6 @@ function StartGame() {
 
     let lastProgram;
     DrawObjects.forEach(function(item) {
-      // if (item.needRender) {
         if (lastProgram == undefined) {
           gl.useProgram(item.program);
           lastProgram = item.program;
@@ -452,7 +474,6 @@ function StartGame() {
           lastProgram = item.program;
         }
         item.render();
-      // }
     });
 
     requestAnimationFrame(DrawScene);
@@ -470,9 +491,9 @@ function InitGraphic(callback, context) {
 
 function StartGraphic(callback, context) {
   console.log("StartGraphic");
-  loadImages(['textures/grass.jpg', 'textures/wall.jpg', 'textures/activeGrass.jpg',
-    'textures/clickGrass.jpg', 'textures/arrow.png', 'textures/lowbar.jpg',
-    'textures/background.jpg', 'textures/hourglass.png', 'textures/grid.png', 'entity/warrior.png',
+  loadImages(['entity/warrior_portrait.png', 'entity/mage_portrait.png', 'textures/activeGrass.jpg',
+    'entity/thief_portrait.png', 'textures/arrow.png', 'textures/lowbar.jpg',
+    'entity/priest_portrait.png', 'entity/skeleton1_portrait.png', 'entity/skeleton2_portrait.png', 'entity/warrior.png',
     'entity/mage.png', 'entity/thief.png', 'entity/priest.png', 'entity/skeleton2.png',
     'entity/skeleton1.png', 'animations/fireball/1.gif', 'animations/fireball/2.gif',
     'animations/fireball/3.gif', 'animations/fireball/4.gif', 'animations/fireball/5.gif',

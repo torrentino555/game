@@ -1,95 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
   <style>
-      /* убираем границу */
-      body, html {
-        margin: 0;
-      }
-      /* растягиваем canvas на всю область просмотра */
-      canvas {
-        width: 100vw;
-        height: 100vh;
-        display: block;
-        position: absolute;
-      }
+    /* убираем границу */
 
-      .container {
-        margin: 0;
-        padding: 0;
-        position: relative;
-      }
+    body,
+    html {
+      margin: 0;
+      position: relative;
+    }
+    /* растягиваем canvas на всю область просмотра */
 
-      .fps, .time {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-      }
+    canvas {
+      width: 100vw;
+      height: 100vh;
+      display: block;
+      position: absolute;
+    }
+
+    .container {
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    .fps,
+    .time {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
 
 
-      .drop-menu {
-        position: absolute;
-      }
+    .drop-menu {
+      position: absolute;
+    }
 
-      .drop-menu ul {
-      }
+    .drop-menu ul {}
 
-      .drop-menu li {
-        list-style-type: none;
-        padding: 2px;
-        vertical-align:middle;
-        background: rgba(222, 244, 255, 1);
-        border-bottom: 1px solid black;
-      }
+    .drop-menu li {
+      list-style-type: none;
+      padding: 2px;
+      vertical-align: middle;
+      background: rgba(222, 244, 255, 1);
+      border-bottom: 1px solid black;
+    }
 
-      .drop-menu li:hover {
-        background: rgba(255, 255, 255, 1);
-      }
+    .drop-menu li:hover {
+      background: rgba(255, 255, 255, 1);
+    }
 
-      .drop-menu li.last-child {
-        border-bottom: 0px;
-      }
-      }
+    .drop-menu li.last-child {
+      border-bottom: 0px;
+    }
+
+    .blur {
+      -webkit-filter: blur(4px);
+      -moz-filter: blur(4px);
+      -o-filter: blur(4px);
+      -ms-filter: blur(4px);
+      filter: blur(4px);
+    }
   </style>
   <script id="2d-vertex-shader" type="notjs">
-  attribute vec2 a_position;
-  attribute vec2 a_texcoord;
-  uniform vec2 u_translation;
-  varying vec2 v_texcoord;
-  void main() {
-    gl_Position = vec4(a_position + u_translation, 0, 1);
-    v_texcoord = a_texcoord;
-  }
+    attribute vec2 a_position; attribute vec2 a_texcoord; uniform vec2 u_translation; varying vec2 v_texcoord; void main() { gl_Position = vec4(a_position + u_translation, 0, 1); v_texcoord = a_texcoord; }
   </script>
   <script id="2d-fragment-shader" type="notjs">
-  precision mediump float;
-  uniform sampler2D u_texture;
-  varying vec2 v_texcoord;
-  void main() {
-      gl_FragColor = texture2D(u_texture, v_texcoord);
-  }
+    precision mediump float; uniform sampler2D u_texture; varying vec2 v_texcoord; void main() { gl_FragColor = texture2D(u_texture, v_texcoord); }
   </script>
   <script id="2d-vertex-shader2" type="notjs">
-    attribute vec2 a_position;
-    uniform vec2 u_translation;
-    uniform vec4 u_color;
-
-    varying vec4 v_color;
-    void main() {
-      gl_Position = vec4(a_position + u_translation, 0, 1);
-      v_color = u_color;
-    }
+    attribute vec2 a_position; uniform vec2 u_translation; uniform vec4 u_color; varying vec4 v_color; void main() { gl_Position = vec4(a_position + u_translation, 0, 1); v_color = u_color; }
   </script>
   <script id="2d-fragment-shader2" type="notjs">
-    precision mediump float;
-    varying vec4 v_color;
-    void main() {
-      gl_FragColor = v_color;
-    }
+    precision mediump float; varying vec4 v_color; void main() { gl_FragColor = v_color; }
   </script>
 </head>
+
 <body>
   <div class="container">
     <canvas id="background"></canvas>
@@ -97,9 +86,11 @@
     <div class="fps">
       FPS: <span id="fps"></span>
     </div>
-    <div style="left:6.3%" class="time">
-      <span id ="time"></span>
+    <div style="position: relative;">
+      <span style="position:absolute; left:6.3%; top:200px;" id="time"></span>
     </div>
+  </div>
+  <div hidden id="menu" style="background: yellow; padding: 5px;position:absolute;top:45vh;left:45vw;">
   </div>
   <script src="Utils.js" charset="utf-8"></script>
   <script src="Entity.js" charset="utf-8"></script>
@@ -118,4 +109,5 @@
   <script src="Action.js" charset="utf-8"></script>
   <script src="start.js" charset="utf-8"></script>
 </body>
+
 </html>
