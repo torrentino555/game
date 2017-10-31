@@ -414,7 +414,7 @@ function InitGlAndEvents() {
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
-    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
+    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden')) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       if (window.tiledMap[i][j].isWall) {

@@ -75,6 +75,11 @@ class DemoGameModule {
             }
 
             if (this.isEnemiesDead()) {
+                setTimeout(function() {
+                  document.getElementsByClassName('container')[0].setAttribute('class', 'blur container');
+                  document.getElementById('menu').removeAttribute('hidden');
+                  document.getElementById('menu').innerHTML = 'Вы победили!';
+                }, 1000);
                 this.winGame();
             }
         }
