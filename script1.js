@@ -338,7 +338,6 @@ function unitAttack(nameSkill, sender, target, wounded) {
 }
 
 function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
-  console.log("KILL");
   let index = indexUnit(sender.unitOnTile);
   DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[90 + 3 * index]);
   setTimeout(() => {
@@ -362,6 +361,7 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
       DrawObjects[sender.unitOnTile.entity.mapId].setTexture(images[9 + index]);
       DeadUnits.forEach((unit) => {
         DrawObjects[unit.entity.mapId].setTexture(images[92 + 3 * indexUnit(unit)]);
+        DrawObjects[unit.entity.healthbarId].setVertexs(madeRectangle(0, 0, 0, 0));
       });
       wounded.forEach((unit) => {
         if (unit.healthpoint[0] > 0) {
