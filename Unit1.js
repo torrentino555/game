@@ -54,7 +54,7 @@ class Unit {
     let firstSkill = new Skill();
     firstSkill.createSkill("Thunderbolt", "An electrical jolt deals air damage to target character, knocking him down for 1 turn", "point", 1, this.damage, 2);
     let secondSkill = new Skill();
-    secondSkill.createSkill("Fire ball", "Hurl a fiery sphere that will explode", "circle", 1, this.damage, 2);
+    secondSkill.createSkill("Fire ball", "Hurl a fiery sphere that will explode", "circle", 2, this.damage, 2);
     this.skills.push(attackSkill, firstSkill, secondSkill);
     this.type = "player";
     this.shooter = true;
@@ -128,7 +128,7 @@ class Unit {
     } else if (Math.random() < unit.blockRate) {
       currentSkillDamage *= 0.3;
     }
-		console.log("Current Damage: " + currentSkillDamage);
+		console.log("Current Damage: " + Math.floor(currentSkillDamage * ((100 - unit.armor) / 100)));
 
     unit.healthpoint[0] -= Math.floor(currentSkillDamage * ((100 - unit.armor) / 100));
   }
