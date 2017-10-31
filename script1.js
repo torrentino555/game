@@ -232,14 +232,14 @@ function ActiveEntity(unit) {
       div.style.left = event.clientX - 40 + 'px';
       div.style.top = event.clientY - 15 + 'px';
       div.appendChild(ul);
-      let elem = tiledMap[activeElem[1]][activeElem[2]];
+      let elem = window.tiledMap[activeElem[1]][activeElem[2]];
       let x = function(item) {
         let li = document.createElement('li');
         li.innerHTML = item.name;
         li.onclick = function() {
           let action = new Action();
-          action.sender = tiledMap[unit.xpos][unit.ypos];
-          action.target = tiledMap[activeElem[1]][activeElem[2]];
+          action.sender = window.tiledMap[unit.xpos][unit.ypos];
+          action.target = window.tiledMap[activeElem[1]][activeElem[2]];
           action.ability = item;
           actionDeque.push(action);
           dropMenu.remove();
@@ -394,7 +394,7 @@ function InitGlAndEvents() {
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
-      if (tiledMap[i][j].isWall) {
+      if (window.tiledMap[i][j].isWall) {
         setTranslation(activeElem[0], [-2, -2]);
         activeElem[1] = -1;
         activeElem[2] = -1;
