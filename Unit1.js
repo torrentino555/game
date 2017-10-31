@@ -128,7 +128,7 @@ class Unit {
     } else if (Math.random() < unit.blockRate) {
       currentSkillDamage *= 0.3;
     }
-		console.log("Current Damage: " + currentSkillDamage);
+		console.log("Current Damage: " + Math.floor(currentSkillDamage * ((100 - unit.armor) / 100)));
 
     unit.healthpoint[0] -= Math.floor(currentSkillDamage * ((100 - unit.armor) / 100));
   }

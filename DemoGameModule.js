@@ -71,18 +71,19 @@ class DemoGameModule {
             console.log("health begin: " + action.target.getInhabitant().healthpoint);
             //AOE HILL
             if(action.ability.typeOfArea === "circle") {
-              for(let i = action.sender.xpos-action.ability.area; i < action.ability.area*2+1; i++) {
-                for(let j = action.sender.ypos-action.ability.area; j < action.ability.area*2+1; j++) {
-                  if(i > 0 && j > 0 && i < WIDTH && j < HEIGHT) {
-                    if(tiledMap[i][j].isOccupied() && tiledMap[i][j].getInhabitant().type === action.sender.getInhabitant().type) {
-                      healedAllies.push(tiledMap[i][j].getInhabitant());
-                      action.sender.getInhabitant().useHealSkill(tiledMap[i][j].getInhabitant(), action.ability);
+                console.log("THIS IS AOE HILL");
+              for(let i = action.target.xpos-action.ability.area; i < action.target.xpos + action.ability.area; i++) {
+                for(let j = action.target.ypos-action.ability.area; j < action.target.ypos + action.ability.area; j++) {
+                  if(i >= 0 && j >= 0 && i < WIDTH && j < HEIGHT) {
+                      console.log("WTF is " + i + " " + j);
+                    if(window.tiledMap[i][j].isOccupied() && window.tiledMap[i][j].getInhabitant().type === action.sender.getInhabitant().type) {
+                        console.log("this is AOE hill on someone: " + i + " " + j);
+                        healedAllies.push(window.tiledMap[i][j].getInhabitant());
+                      action.sender.getInhabitant().useHealSkill(window.tiledMap[i][j].getInhabitant(), action.ability);
                     }
                   }
-
                 }
               }
-
             } else {
               action.sender.getInhabitant().useHealSkill(action.target.getInhabitant(), action.ability);
               healedAllies.push(action.target.getInhabitant());
@@ -90,19 +91,23 @@ class DemoGameModule {
               window.unitAttack(action.ability.name, action.sender, action.target, healedAllies);
             }
           } else if (action.ability.damage[1] > 0) {
-            console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
-            console.log("this is damage: " + action.ability.name);
-						console.log("health begin: " + action.target.getInhabitant().healthpoint);
+              console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
+              console.log("this is damage: " + action.ability.name);
+              console.log("health begin: " + action.target.getInhabitant().healthpoint);
             //AOE DAMAGE
-            if(action.ability.typeOfArea === "circle") {
-              for(let i = action.sender.xpos-action.ability.area; i < action.ability.area*2+1; i++) {
-                for(let j = action.sender.ypos-action.ability.area; j < action.ability.area*2+1; j++) {
+              if(action.ability.typeOfArea === "circle") {
+                 console.log("THIS IS AOE DAMAGE");
+                 console.log("target on " + action.target.xpos + " " + action.target.ypos);
+              for(let i = action.target.xpos-action.ability.area; i < action.target.xpos + action.ability.area; i++) {
+                for(let j = action.target.ypos-action.ability.area; j < action.target.ypos + action.ability.area; j++) {
+                    console.log("i: " + i + " j: " + j);
                   if(i > 0 && j > 0 && i < WIDTH && j < HEIGHT) {
-                    if(tiledMap[i][j].isOccupied()) {
-                        woundedEnemies.push(tiledMap[i][j].getInhabitant());
-                        action.sender.getInhabitant().useDamageSkill(tiledMap[i][j].getInhabitant(), action.ability);
-                        if(tiledMap[i][j].getInhabitant().isDead()) {
-                            deadEnemies.push(tiledMap[i][j].getInhabitant());
+                    if(window.tiledMap[i][j].isOccupied()) {
+                        woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
+                        console.log(window.tiledMap[i][j] + " IS WOUNDED");
+                        action.sender.getInhabitant().useDamageSkill(window.tiledMap[i][j].getInhabitant(), action.ability);
+                        if(window.tiledMap[i][j].getInhabitant().isDead()) {
+                            deadEnemies.push(window.tiledMap[i][j].getInhabitant());
                         }
                     }
                   }
@@ -118,7 +123,7 @@ class DemoGameModule {
 
             if (deadEnemies.length > 0) {
                 console.log(action.target.getInhabitant().name + " IS DEAD");
-				unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
+				window.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
                 this.initiativeLine.RemoveUnit(action.target.getInhabitant());
               //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
             } else {
@@ -126,13 +131,13 @@ class DemoGameModule {
             }
           }
         } else if (action.isSkip()) {
-          this.skipAction();
-				}
+            this.skipAction();
+        }
       }
 
       console.log("action point: " + this.activeUnit.actionPoint);
 
-      if (this.activeUnit.actionPoint === 0 || Math.ceil(this.timer / 1000) == 0 || this.activeUnit.isDead()){
+      if (this.activeUnit.actionPoint === 0 || Math.ceil(this.timer / 1000) === 0 || this.activeUnit.isDead()){
         this.skipAction();
       }
 
@@ -202,13 +207,13 @@ class DemoGameModule {
       while (true) {
         randRow = Math.floor(Math.random() * window.HEIGHT);
         randCol = Math.floor(Math.random() * 3); //первые три столбца поля
-        if (window.tiledMap[randRow][randCol].isWall === NOTWALL && !window.tiledMap[randRow][randCol].isOccupied()) {
+        if (window.tiledMap[randCol][randRow].isWall === NOTWALL && !window.tiledMap[randCol][randRow].isOccupied()) {
           break;
         }
       }
-      players[i].ypos = randRow;
-      players[i].xpos = randCol;
-      window.tiledMap[randRow][randCol].occupy(players[i]);
+      players[i].ypos = randCol;
+      players[i].xpos = randRow;
+      window.tiledMap[randCol][randRow].occupy(players[i]);
     }
   }
 
@@ -218,14 +223,14 @@ class DemoGameModule {
       let randCol;
       while (true) {
         randRow = Math.floor(Math.random() * window.HEIGHT);
-        randCol = Math.floor(Math.random() * 3) + 13; //последние три столбца поля
-        if (window.tiledMap[randRow][randCol].isWall === NOTWALL && !window.tiledMap[randRow][randCol].isOccupied()) {
+        randCol = Math.floor(Math.random() * 3) + window.WIDTH - 3; //последние три столбца поля
+        if (window.tiledMap[randCol][randRow].isWall === NOTWALL && !window.tiledMap[randCol][randRow].isOccupied()) {
           break;
         }
       }
-      enemies[i].ypos = randRow;
       enemies[i].xpos = randCol;
-      window.tiledMap[randRow][randCol].occupy(enemies[i]);
+      enemies[i].ypos = randRow;
+      window.tiledMap[randCol][randRow].occupy(enemies[i]);
     }
   }
 
