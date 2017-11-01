@@ -1,30 +1,30 @@
 class Pathfinding {
     constructor(start){
+        this.distance = new Map();
+        this.path = new Map();
         this.sender = start.getInhabitant();
         this.frontier = [];
         this.frontier.push(start);
-        this.path = {};
-        this.path[start] = false;
-        this.distance = {};
-        this.distance[start] = 0;
+        this.path.set(start, null);
+        this.distance.set(start, 0);
     }
 
     possibleMoves() {
         while (!this.frontier.empty()) {
             let current = this.frontier.shift();
-            if(this.distance[current] === this.sender.movePoint) {
+            if(this.distance.get(current) === this.sender.movePoint) {
                 break;
             }
             let currentNeighbors = this.tileNeighbors(current);
             for (let i = 0; i < currentNeighbors.length; i++) {
-                if (!(currentNeighbors[i] in this.distance)) {
+                if (!(this.distance.has(currentNeighbors[i]))) {
                     this.frontier.push(currentNeighbors[i]);
-                    this.path[currentNeighbors[i]] = this.path[current];
-                    this.distance[currentNeighbors[i]] = 1 + this.distance[current];
+                    this.path.set(currentNeighbors[i], current);
+                    this.distance.set(currentNeighbors[i], 1 + this.distance.get(current));
                 }
             }
         }
-        return [this.distance, this.path];
+        return this.path;
     }
 
     tileNeighbors(current) {
