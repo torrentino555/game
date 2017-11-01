@@ -75,11 +75,6 @@ class DemoGameModule {
             }
 
             if (this.isEnemiesDead()) {
-                setTimeout(function() {
-                  document.getElementsByClassName('container')[0].setAttribute('class', 'blur container');
-                  document.getElementById('menu').removeAttribute('hidden');
-                  document.getElementById('menu').innerHTML = 'Вы победили!';
-                }, 1000);
                 this.winGame();
             }
         }
@@ -180,6 +175,11 @@ class DemoGameModule {
     }
 
     winGame() {
+        setTimeout(function() {
+            document.getElementsByClassName('container')[0].setAttribute('class', 'blur container');
+            document.getElementById('menu').removeAttribute('hidden');
+            document.getElementById('menu').innerHTML = 'Вы победили!';
+        }, 1000);
         this.stopGameLoop();
         //createoverlaywin
     }
@@ -294,6 +294,8 @@ class DemoGameModule {
         console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
         this.activeUnit.actionPoint = 2;
         window.ActiveEntity(this.activeUnit);
+        // let pathfinding = new Pathfinding(window.tiledMap[this.activeUnit.xpos][this.activeUnit.ypos]);
+        // window.showPossibleMoves(pathfinding.possibleMoves);
         //изменяем LowerBar
         //изменяем activeEntity
     }
