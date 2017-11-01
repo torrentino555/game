@@ -3,24 +3,28 @@ class Pathfinding {
         this.sender = start.getInhabitant();
         this.frontier = [];
         this.frontier.push(start);
+        this.path = {};
+        this.path[start] = false;
         this.distance = {};
         this.distance[start] = 0;
-        this.counter = 0;
     }
 
     possibleMoves() {
-        while (!this.frontier.empty() && this.counter < this.sender.movePoint) {
-            let current = this.frontier.pop();
+        while (!this.frontier.empty()) {
+            let current = this.frontier.shift();
+            if(this.distance[current] === this.sender.movePoint) {
+                break;
+            }
             let currentNeighbors = this.tileNeighbors(current);
             for (let i = 0; i < currentNeighbors.length; i++) {
                 if (!(currentNeighbors[i] in this.distance)) {
                     this.frontier.push(currentNeighbors[i]);
+                    this.path[currentNeighbors[i]] = this.path[current];
                     this.distance[currentNeighbors[i]] = 1 + this.distance[current];
                 }
             }
-            this.counter++;
         }
-        return this.distance;
+        return [this.distance, this.path];
     }
 
     tileNeighbors(current) {

@@ -295,7 +295,7 @@ class DemoGameModule {
         this.activeUnit.actionPoint = 2;
         window.ActiveEntity(this.activeUnit);
         // let pathfinding = new Pathfinding(window.tiledMap[this.activeUnit.xpos][this.activeUnit.ypos]);
-        // window.showPossibleMoves(pathfinding.possibleMoves);
+        // window.showPossibleMoves(pathfinding.possibleMoves());
         //изменяем LowerBar
         //изменяем activeEntity
     }
