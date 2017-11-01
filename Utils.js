@@ -26,6 +26,10 @@ class Utils {
     return [-0.6 + j*(1.2/16), 0.85 - i*(1.2/16)*16/9];
   }
 
+  static translationForUnits(unit) {
+    return [-0.6 - 0.08 + unit.xpos*(1.2/16), 0.85 - unit.ypos*(1.2/16)*16/9 + (1.2 / 12) * ratio];
+  }
+
   static transOnLowbar(i) {
     return [-0.55 + 0.005 + i*0.1, -0.79 - 0.01];
   }
