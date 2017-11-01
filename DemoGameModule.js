@@ -89,11 +89,12 @@ class DemoGameModule {
         console.log(action.sender.getInhabitant().name + " make move from [" + action.sender.xpos + "," + action.sender.ypos + "]" + " to [" + action.target.xpos + "," + action.target.ypos + "]");
         let toMove = action.sender.getInhabitant();
         let pathfinding = new Pathfinding(action.sender);
+        let allMoves = pathfinding.possibleMoves();
         let path = [];
         let currentTile = action.target;
-        while (pathfinding.get(currentTile) !== null) {
-            path.push(pathfinding.get(currentTile));
-            currentTile = pathfinding.get(currentTile);
+        while (allMoves.get(currentTile) !== null) {
+            path.push(allMoves.get(currentTile));
+            currentTile = allMoves.get(currentTile);
         }
         window.moveTo(action.sender, path);
         action.sender.unoccupy();
@@ -106,9 +107,6 @@ class DemoGameModule {
 
     makeHill(action) {
         let healedAllies = [];
-        console.log(action.sender.getInhabitant().name + " make heal to " + action.target.getInhabitant().name);
-        console.log("this is heal: " + action.ability.name);
-        console.log("health begin: " + action.target.getInhabitant().healthpoint);
         //AOE HILL
         if(action.ability.typeOfArea === "circle") {
           console.log("THIS IS AOE HILL");
@@ -304,8 +302,9 @@ class DemoGameModule {
 
     sendPossibleMoves() {
         let pathfinding = new Pathfinding(window.tiledMap[this.activeUnit.xpos][this.activeUnit.ypos]);
+        let allMoves = pathfinding.possibleMoves();
         let path = [];
-        for(let key of pathfinding.keys()){
+        for(let key of allMoves.keys()){
             path.push(key);
         }
         window.showPossibleMoves(path);
