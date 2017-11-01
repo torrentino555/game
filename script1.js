@@ -12,6 +12,8 @@ let program;
 let program1;
 let tex;
 let lowbar = 0;
+let lowbarUnits = [];
+let notFirstActive = false;
 
 function NewAdd(program, translation, texture, vertexs, blend, texCoord) {
   let attributes = [new Attribute('a_position', vertexs),
@@ -123,6 +125,7 @@ function AddEntity(unit) {
   unit.entity.lowbarId = AddDrawObject(Utils.transOnLowbar(lowbar++), images[imageUnit(unit)], madeRectangle(0, 0, 0.09, -0.09*ratio), true);
   unit.entity.mapId = AddDrawObject(t, images[index], madeRectangle(0, 0, (1.2 / 9)*1.7, -(1.2 / 9) * 1.7 * ratio), true);
   unit.entity.healthbarId = AddColorObject([t[0] + 0.083, t[1] + (1.2/17)*ratio - (1.2 / 12) * ratio], madeRectangle(0, 0, 1.2/16 - 0.006, -0.015), [250/255, 44/255, 31/255, 1.0]);
+  lowbarUnits.push(unit);
 }
 
 
@@ -230,8 +233,8 @@ function Explosion(obj) {
   function AnimationExplosion(now) {
     now *= 0.001;
     let deltaTime = now - time;
-    if (deltaTime < timeAnimation) {
-      let texture = images[46 + Math.floor((deltaTime % 1) / (1 / 44))];
+    if (deltaTime >= timeAnimation) {
+      let texture = images[46 + Math.floor((deltaTime % timeAnimation) / (1 / 44))];
       obj.forEach(function(item) {
         DrawObjects[item].setTexture(texture);
       });
@@ -240,11 +243,69 @@ function Explosion(obj) {
   }
 }
 
+function deltaTrasn(start, deltaT, deltaTime, timeA) {
+  return [start[0] + deltaT[0]*(deltaTime/timeA), start[1] + deltaT[1]*(deltaTime/timeA)];
+}
+
+function StartAnimation(start, dest, timeA, id) {
+  let time = performance.now() * 0.001;
+  let deltaT = [dest[0] - start[0], dest[1] - start[1]];
+  let args = {
+    time: time,
+    deltaT: deltaT,
+    start: start,
+    dest: dest,
+    timeA: timeA,
+    id: id,
+  };
+  requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT));
+}
+
+function MoveEntity(now, time, timeA, start, dest, id, deltaT) {
+  now *= 0.001;
+  // console.log(id);
+  let deltaTime = now - time;
+  if (deltaTime > timeA) {
+    DrawObjects[id].setTrans(dest);
+  } else {
+    DrawObjects[id].setTrans(deltaTrasn(start, deltaT, deltaTime, timeA));
+    requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT));
+  }
+}
+
+function ChangeActiveEntity() {
+  let t = Utils.transOnLowbar(0);
+  StartAnimation(t, [t[0], t[1] + 0.17], 0.5, lowbarUnits[lowbarUnits.length - 1].entity.lowbarId);
+  for (let i = 0; i < lowbarUnits.length - 1; i++) {
+    StartAnimation(Utils.transOnLowbar(i + 1), Utils.transOnLowbar(i),
+    0.8, lowbarUnits[i].entity.lowbarId);
+  }
+  setTimeout(function() {
+    let t = Utils.transOnLowbar(0);
+    StartAnimation([t[0], t[1] + 0.17], [t[0] + (lowbarUnits.length - 1)*0.1, t[1] + 0.17], 0.5, lowbarUnits[lowbarUnits.length - 1].entity.lowbarId);
+  }, 600);
+  setTimeout(function() {
+    let t = Utils.transOnLowbar(lowbarUnits.length - 1);
+    StartAnimation([t[0], t[1] + 0.17], t, 0.5, lowbarUnits[lowbarUnits.length - 1].entity.lowbarId);
+    let x = lowbarUnits[0];
+    lowbarUnits.splice(0, 1);
+    lowbarUnits.push(x);
+  }, 1200);
+}
+
 function DeleteEntity(index) {
   delete DrawObjects[index];
 }
 
 function ActiveEntity(unit) {
+  if (notFirstActive) {
+    ChangeActiveEntity(unit);
+  } else {
+    let x = lowbarUnits[0];
+    lowbarUnits.splice(0, 1);
+    lowbarUnits.push(x);
+    notFirstActive = true;
+  }
   DrawObjects[activeTile].setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
   document.onmousedown = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;

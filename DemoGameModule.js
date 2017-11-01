@@ -25,15 +25,16 @@ class DemoGameModule {
         DemoGameModule.setPlayersPositions(this.players);
         DemoGameModule.setEnemiesPositions(this.enemies);
         console.log("Everyone on positions: ");
-        console.log(this.initiativeLine.ShowEveryoneInLine());
         //отрисовка персонажей
-        for (let i = 0; i < window.PARTYSIZE; i++) {
-          window.AddEntity(this.players[i]);
-        }
 
-        for (let i = 0; i < window.ENEMIESSIZE; i++) {
-          window.AddEntity(this.enemies[i]);
+        for (let i = 0; i < window.PARTYSIZE + window.ENEMIESSIZE; i++) {
+          if (i == 0) {
+            window.AddEntity(this.initiativeLine.CurrentUnit());
+          } else {
+            window.AddEntity(this.initiativeLine.NextUnit());
+          }
         }
+        this.initiativeLine.NextUnit();
 
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
