@@ -39,7 +39,7 @@ class DemoGameModule {
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
         window.ActiveEntity(this.activeUnit);
-        this.sendPossibleMoves();
+        //this.sendPossibleMoves();
     }
 
 
@@ -68,7 +68,7 @@ class DemoGameModule {
                 }
 
                 if(this.activeUnit.actionPoint === 1) {
-                    this.sendPossibleMoves();
+                    //this.sendPossibleMoves();
                 }
             }
             console.log("action point: " + this.activeUnit.actionPoint);
@@ -97,8 +97,8 @@ class DemoGameModule {
         while (allMoves.get(currentTile) !== null) {
             path.push(allMoves.get(currentTile));
             currentTile = allMoves.get(currentTile);
+            window.movingTo(action.sender, path);
         }
-        window.moveTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
         this.activeUnit.xpos = action.target.xpos;
@@ -322,7 +322,7 @@ class DemoGameModule {
         console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
         this.activeUnit.actionPoint = 2;
         window.ActiveEntity(this.activeUnit);
-        this.sendPossibleMoves();
+        //this.sendPossibleMoves();
         //изменяем LowerBar
         //изменяем activeEntity
     }

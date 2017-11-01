@@ -145,7 +145,7 @@ function getObj(ind) {
 }
 
 
-function moveTo(TileStart, path) {
+function movingTo(TileStart, path) {
     let unit = TileStart.unitOnTile;
     let left = TileStart;
     for (let i = 0; i < path.length; i++) {
