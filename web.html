@@ -71,7 +71,7 @@
     uniform vec2 u_translation;
     varying vec2 v_texcoord;
     void main() {
-      gl_Position = vec4(a_position + u_translation, 0, 1); 
+      gl_Position = vec4(a_position + u_translation, 0, 1);
       v_texcoord = a_texcoord;
     }
   </script>
@@ -105,6 +105,7 @@
   <div hidden id="menu" style="background: yellow; padding: 5px;position:absolute;top:45vh;left:45vw;">
   </div>
   <script src="Utils.js" charset="utf-8"></script>
+  <script src="Pathfinding.js" charset="utf-8"></script>
   <script src="Entity.js" charset="utf-8"></script>
   <script src="Program.js" charset="utf-8"></script>
   <script src="loader.js" charset="utf-8"></script>

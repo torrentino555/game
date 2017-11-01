@@ -127,9 +127,7 @@ function AddEntity(unit) {
       console.log("ERROR ADDENTITY, NAMETEXTURE NOT FOUND");
   }
   unit.entity = new Entity();
-  let t = Utils.translationOnMap(unit.ypos, unit.xpos);
-  t[0] -= 0.08;
-  t[1] += (1.2 / 12) * ratio;
+  let t = Utils.translationForUnits(unit);
   unit.entity.lowbarId = countIndexes;
   indexes[countIndexes] = AddDrawObject(0, countIndexes, Utils.transOnLowbar(lowbar++), images[imageUnit(unit)], madeRectangle(0, 0, 0.09, -0.09*ratio), true);
   countIndexes++;
@@ -147,49 +145,57 @@ function getObj(ind) {
 }
 
 
-function moveTo(TileStart, TileDest) {
-  SortObjects();
-  let obj = getObj(TileStart.unitOnTile.entity.mapId);
-  let deltaY = TileDest.ypos - TileStart.ypos;
-  let y = TileStart.ypos;
-  let healthbar = getObj(TileStart.unitOnTile.entity.healthbarId);
-  TileDest.unitOnTile = TileStart.unitOnTile;
-  TileDest.unitOnTile.xpos = TileDest.xpos;
-  TileDest.unitOnTile.ypos = TileDest.ypos;
-  TileStart.unitOnTile = null;
-  let time = performance.now() * 0.001;
-  let pT = obj.getTrans();
-  let nT = Utils.translationOnMap(TileDest.ypos, TileDest.xpos);
-  let translationActiveTile = getObj(activeTile).getTrans();
-  nT[0] -= 0.08;
-  nT[1] += (1.2 / 12) * ratio;
-  let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
-  let timeAnimation = 2;
-  requestAnimationFrame(AnimationMove);
-
-  function AnimationMove(now) {
-    now *= 0.001;
-    let deltaTime = now - time;
-    if (deltaTime >= timeAnimation) {
-      obj.setTrans(nT);
-      if (translationActiveTile == getObj(activeTile).getTrans()) {
-        obj.setTrans(nT);
-        obj.order = y + deltaY;
-        getObj(TileDest.unitOnTile.entity.healthbarId).setTrans([nT[0] + 0.083, nT[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
-        getObj(TileDest.unitOnTile.entity.healthbarId).order = y + deltaY;
-        getObj(activeTile).setTrans([nT[0] + 0.08, nT[1] - (1.2/12)*ratio]);
-        SortObjects();
-      }
-    } else {
-      obj.order = y + deltaY*(deltaTime/timeAnimation);
-      obj.setTrans([pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
-        pT[1] + deltaTranslation[1] * deltaTime / timeAnimation]);
-      getObj(TileDest.unitOnTile.entity.healthbarId).setTrans([obj.getTrans()[0] + 0.083, obj.getTrans()[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
-      getObj(TileDest.unitOnTile.entity.healthbarId).order = y + deltaY*(deltaTime/timeAnimation);
-      SortObjects();
-      requestAnimationFrame(AnimationMove);
+function moveTo(TileStart, path) {
+    let unit = TileStart.unitOnTile;
+    let left = TileStart;
+    for (let i = 0; i < path.length; i++) {
+      setTimeout(function() {
+        StartAnimation(Utils.translationForUnits(left), Utils.translationForUnits(path[i]), 0.3, unit.entity.mapId);
+      }, 300*i);
+      left = path[i];
     }
-  }
+
+  // let obj = getObj(TileStart.unitOnTile.entity.mapId);
+  // let deltaY = TileDest.ypos - TileStart.ypos;
+  // let y = TileStart.ypos;
+  // let healthbar = getObj(TileStart.unitOnTile.entity.healthbarId);
+  // TileDest.unitOnTile = TileStart.unitOnTile;
+  // TileDest.unitOnTile.xpos = TileDest.xpos;
+  // TileDest.unitOnTile.ypos = TileDest.ypos;
+  // TileStart.unitOnTile = null;
+  // let time = performance.now() * 0.001;
+  // let pT = obj.getTrans();
+  // let nT = Utils.translationOnMap(TileDest.ypos, TileDest.xpos);
+  // let translationActiveTile = getObj(activeTile).getTrans();
+  // nT[0] -= 0.08;
+  // nT[1] += (1.2 / 12) * ratio;
+  // let deltaTranslation = [nT[0] - pT[0], nT[1] - pT[1]];
+  // let timeAnimation = 2;
+  // requestAnimationFrame(AnimationMove);
+  //
+  // function AnimationMove(now) {
+  //   now *= 0.001;
+  //   let deltaTime = now - time;
+  //   if (deltaTime >= timeAnimation) {
+  //     obj.setTrans(nT);
+  //     if (translationActiveTile == getObj(activeTile).getTrans()) {
+  //       obj.setTrans(nT);
+  //       obj.order = y + deltaY;
+  //       getObj(TileDest.unitOnTile.entity.healthbarId).setTrans([nT[0] + 0.083, nT[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
+  //       getObj(TileDest.unitOnTile.entity.healthbarId).order = y + deltaY;
+  //       getObj(activeTile).setTrans([nT[0] + 0.08, nT[1] - (1.2/12)*ratio]);
+  //       SortObjects();
+  //     }
+  //   } else {
+  //     obj.order = y + deltaY*(deltaTime/timeAnimation);
+  //     obj.setTrans([pT[0] + deltaTranslation[0] * deltaTime / timeAnimation,
+  //       pT[1] + deltaTranslation[1] * deltaTime / timeAnimation]);
+  //     getObj(TileDest.unitOnTile.entity.healthbarId).setTrans([obj.getTrans()[0] + 0.083, obj.getTrans()[1]  + (1.2/17)*ratio - (1.2 / 12) * ratio]);
+  //     getObj(TileDest.unitOnTile.entity.healthbarId).order = y + deltaY*(deltaTime/timeAnimation);
+  //     SortObjects();
+  //     requestAnimationFrame(AnimationMove);
+  //   }
+  // }
 }
 
 function Thunderbolt(TileStart, TileDest) {
@@ -281,7 +287,7 @@ function deltaTrasn(start, deltaT, deltaTime, timeA) {
   return [start[0] + deltaT[0]*(deltaTime/timeA), start[1] + deltaT[1]*(deltaTime/timeA)];
 }
 
-function StartAnimation(start, dest, timeA, id, state) {
+function StartAnimation(start, dest, timeA, id) {
   let time = performance.now() * 0.001;
   let deltaT = [dest[0] - start[0], dest[1] - start[1]];
   let args = {
@@ -292,17 +298,14 @@ function StartAnimation(start, dest, timeA, id, state) {
     timeA: timeA,
     id: id,
   };
-  requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT, state));
+  requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT));
 }
 
-function MoveEntity(now, time, timeA, start, dest, id, deltaT, state) {
+function MoveEntity(now, time, timeA, start, dest, id, deltaT) {
   now *= 0.001;
   let deltaTime = now - time;
   if (deltaTime > timeA) {
     getObj(id).setTrans(dest);
-    if (state) {
-      stateAnimation = false;
-    }
   } else {
     getObj(id).setTrans (deltaTrasn(start, deltaT, deltaTime, timeA));
     requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT));
@@ -311,14 +314,16 @@ function MoveEntity(now, time, timeA, start, dest, id, deltaT, state) {
 
 function ChangeActiveEntity() {
   if (stateAnimation) {
-    requestAnimationFrame(ChangeActiveEntity);
+    setTimeout(function() {
+      requestAnimationFrame(ChangeActiveEntity);
+    }, 200);
   }
+  stateAnimation = true;
   console.log(lowbarUnits[0].class);
   let x = lowbarUnits[0];
   lowbarUnits.splice(0, 1);
   lowbarUnits.push(x);
   console.log(lowbarUnits[0].class);
-  stateAnimation = true;
   let t = Utils.transOnLowbar(0);
   StartAnimation(t, [t[0], t[1] + 0.17], 0.5, lowbarUnits[lowbarUnits.length - 1].entity.lowbarId);
   for (let i = 0; i < lowbarUnits.length - 1; i++) {
@@ -332,13 +337,15 @@ function ChangeActiveEntity() {
   setTimeout(function() {
     let t = Utils.transOnLowbar(lowbarUnits.length - 1);
     StartAnimation([t[0], t[1] + 0.17], t, 0.5, lowbarUnits[lowbarUnits.length - 1].entity.lowbarId);
-    setTimeout(function() { stateAnimation = false;}, 600);
   }, 1200);
+  setTimeout(function() { stateAnimation = false;}, 1800);
 }
 
 function RemoveUnitsInInitiativeLine(units) {
   if (stateAnimation) {
-    requestAnimationFrame(RemoveUnitsInInitiativeLine(this, units));
+    setTimeout(function() {
+      requestAnimationFrame(RemoveUnitsInInitiativeLine.bind(this, units));
+    }, 200);
   }
   stateAnimation = true;
   units.forEach(function(unit) {
@@ -348,8 +355,8 @@ function RemoveUnitsInInitiativeLine(units) {
   lowbarUnits.forEach(function(unit, i) {
     let t = Utils.transOnLowbar(i);
     StartAnimation(getObj(unit.entity.lowbarId).getTrans(), t, 0.5, unit.entity.lowbarId);
-    setTimeout(function() { stateAnimation = false;}, 600);
   });
+  setTimeout(function() { stateAnimation = false;}, 600);
 }
 
 function DeleteEntity(index) {
@@ -379,7 +386,7 @@ function ActiveEntity(unit) {
   document.onmousedown = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
-    if (event.which == 1 && x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden') && dropMenu == 0) {
+    if (event.which == 1 && x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden') && dropMenu == 0 && !stateAnimation) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       let div = document.createElement('div');
@@ -549,7 +556,7 @@ function InitGlAndEvents() {
   gl.canvas.onmousemove = function(event) {
     let x = event.clientX / gl.canvas.clientWidth;
     let y = event.clientY / gl.canvas.clientHeight;
-    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden')) {
+    if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden') && !stateAnimation) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
       if (window.tiledMap[i][j].isWall) {
