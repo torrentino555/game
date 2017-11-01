@@ -65,8 +65,13 @@ class DemoGameModule {
                 } else if (action.isSkip()) {
                     this.skipAction();
                 }
+
+                if(this.activeUnit.actionPoint === 1) {
+                    this.sendPossibleMoves();
+                }
             }
             console.log("action point: " + this.activeUnit.actionPoint);
+
             if (this.activeUnit.actionPoint === 0 || Math.ceil(this.timer / 1000) === 0 || this.activeUnit.isDead()){
                 this.skipAction();
             }
@@ -76,11 +81,6 @@ class DemoGameModule {
             }
 
             if (this.isEnemiesDead()) {
-                setTimeout(function() {
-                  document.getElementsByClassName('container')[0].setAttribute('class', 'blur container');
-                  document.getElementById('menu').removeAttribute('hidden');
-                  document.getElementById('menu').innerHTML = 'Вы победили!';
-                }, 1000);
                 this.winGame();
             }
         }
@@ -89,9 +89,18 @@ class DemoGameModule {
     makeMove(action) {
         console.log(action.sender.getInhabitant().name + " make move from [" + action.sender.xpos + "," + action.sender.ypos + "]" + " to [" + action.target.xpos + "," + action.target.ypos + "]");
         let toMove = action.sender.getInhabitant();
-        window.moveTo(action.sender, action.target);
+        let pathfinding = new Pathfinding(action.sender);
+        let path = [];
+        let currentTile = action.target;
+        while (pathfinding.get(currentTile) !== null) {
+            path.push(pathfinding.get(currentTile));
+            currentTile = pathfinding.get(currentTile);
+        }
+        window.moveTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
+        this.activeUnit.xpos = action.target.xpos;
+        this.activeUnit.ypos = action.target.ypos;
         console.log("check on unoccupy: " + action.sender.isOccupied());
         console.log("check on occupy: " + action.target.isOccupied());
     }
@@ -128,6 +137,10 @@ class DemoGameModule {
     makeDamage(action) {
         let woundedEnemies = [];
         let deadEnemies = [];
+        console.log(action.sender.getInhabitant().name + " make damage");
+        console.log("this is damage: " + action.ability.name);
+       // console.log("health begin: " + action.target.getInhabitant().healthpoint);
+
         //AOE DAMAGE
         if(action.ability.typeOfArea === "circle") {
             console.log("THIS IS AOE DAMAGE");
@@ -144,6 +157,8 @@ class DemoGameModule {
                             } else {
                                 woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
                             }
+                            //console.log("health end: " + action.target.getInhabitant().healthpoint);
+
                         }
                     }
 
@@ -161,9 +176,12 @@ class DemoGameModule {
         }
 
         if (deadEnemies.length > 0) {
+           // console.log(action.target.getInhabitant().name + " IS DEAD");
+
             window.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
-            this.initiativeLine.RemoveUnit(action.target.getInhabitant());
-            //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
+            for(let i = 0; i < deadEnemies.length; i++) {
+                this.initiativeLine.RemoveUnit(deadEnemies[i]);
+            }            //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
         } else {
             console.log("SOMEONE GET WOUNDED: ", woundedEnemies);
             window.unitAttack(action.ability.name, action.sender, action.target, woundedEnemies);
@@ -176,6 +194,11 @@ class DemoGameModule {
     }
 
     winGame() {
+        setTimeout(function() {
+            document.getElementsByClassName('container')[0].setAttribute('class', 'blur container');
+            document.getElementById('menu').removeAttribute('hidden');
+            document.getElementById('menu').innerHTML = 'Вы победили!';
+        }, 1000);
         this.stopGameLoop();
         //createoverlaywin
     }
@@ -283,6 +306,15 @@ class DemoGameModule {
         this.beginTurn();
     }
 
+    sendPossibleMoves() {
+        let pathfinding = new Pathfinding(window.tiledMap[this.activeUnit.xpos][this.activeUnit.ypos]);
+        let path = [];
+        for(let key of pathfinding.keys()){
+            path.push(key);
+        }
+        window.showPossibleMoves(path);
+    }
+
     beginTurn() {
         this.activeUnit = this.initiativeLine.NextUnit();
         console.log("This turn: ");
@@ -290,6 +322,7 @@ class DemoGameModule {
         console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
         this.activeUnit.actionPoint = 2;
         window.ActiveEntity(this.activeUnit);
+        this.sendPossibleMoves();
         //изменяем LowerBar
         //изменяем activeEntity
     }
