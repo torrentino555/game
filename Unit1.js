@@ -18,7 +18,6 @@ class Unit {
     this.skills = [new Skill()];
     this.type = "enemy"; //enemy player
     this.actionPoint = 2;
-    this.mapId = 0;
     this.lineId = 0;
     this.shooter = false;
     this.skills[0].createSkill("Move", "Move to this position", "point", 1, [0,0], 0);
@@ -139,6 +138,4 @@ class Unit {
         unit.healthpoint[0] = unit.healthpoint[1];
     }
   }
-
-
 }
