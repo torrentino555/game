@@ -25,15 +25,16 @@ class DemoGameModule {
         DemoGameModule.setPlayersPositions(this.players);
         DemoGameModule.setEnemiesPositions(this.enemies);
         console.log("Everyone on positions: ");
-        console.log(this.initiativeLine.ShowEveryoneInLine());
         //отрисовка персонажей
-        for (let i = 0; i < window.PARTYSIZE; i++) {
-          window.AddEntity(this.players[i]);
-        }
 
-        for (let i = 0; i < window.ENEMIESSIZE; i++) {
-          window.AddEntity(this.enemies[i]);
+        for (let i = 0; i < window.PARTYSIZE + window.ENEMIESSIZE; i++) {
+          if (i == 0) {
+            window.AddEntity(this.initiativeLine.CurrentUnit());
+          } else {
+            window.AddEntity(this.initiativeLine.NextUnit());
+          }
         }
+        this.initiativeLine.NextUnit();
 
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
@@ -137,6 +138,7 @@ class DemoGameModule {
         console.log(action.sender.getInhabitant().name + " make damage");
         console.log("this is damage: " + action.ability.name);
        // console.log("health begin: " + action.target.getInhabitant().healthpoint);
+
         //AOE DAMAGE
         if(action.ability.typeOfArea === "circle") {
             console.log("THIS IS AOE DAMAGE");
@@ -154,6 +156,7 @@ class DemoGameModule {
                                 woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
                             }
                             //console.log("health end: " + action.target.getInhabitant().healthpoint);
+
                         }
                     }
 
@@ -172,6 +175,7 @@ class DemoGameModule {
 
         if (deadEnemies.length > 0) {
            // console.log(action.target.getInhabitant().name + " IS DEAD");
+
             window.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
             for(let i = 0; i < deadEnemies.length; i++) {
                 this.initiativeLine.RemoveUnit(deadEnemies[i]);
