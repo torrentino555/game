@@ -29,24 +29,24 @@ class Pathfinding {
 
     tileNeighbors(current) {
         let neighbors = [];
-        if (current.xpos + 1 > window.WIDTH-1 && tiledMap[current.xpos + 1][current.ypos].isWall === window.NOTWALL
-            && !tiledMap[current.xpos + 1][current.ypos].isOccupied()) {
-            neighbors.push(tiledMap[current.xpos + 1][current.ypos]);
+        if (current.xpos + 1 < window.WIDTH && window.tiledMap[current.xpos + 1][current.ypos].isWall === window.NOTWALL
+            && !window.tiledMap[current.xpos + 1][current.ypos].isOccupied()) {
+            neighbors.push(window.tiledMap[current.xpos + 1][current.ypos]);
         }
 
-        if (current.ypos + 1 < window.HEIGHT-1 && tiledMap[current.xpos][current.ypos + 1].isWall === window.NOTWALL
-            && !tiledMap[current.xpos][current.ypos + 1].isOccupied()) {
-            neighbors.push(tiledMap[current.xpos][current.ypos + 1]);
+        if (current.ypos + 1 < window.HEIGHT && window.tiledMap[current.xpos][current.ypos + 1].isWall === window.NOTWALL
+            && !window.tiledMap[current.xpos][current.ypos + 1].isOccupied()) {
+            neighbors.push(window.tiledMap[current.xpos][current.ypos + 1]);
         }
 
-        if (current.xpos - 1 < 0 && tiledMap[current.xpos -1][current.ypos].isWall === window.NOTWALL
-            && !tiledMap[current.xpos - 1][current.ypos].isOccupied()) {
-            neighbors.push(tiledMap[current.xpos - 1][current.ypos]);
+        if (current.xpos - 1 >= 0 && window.tiledMap[current.xpos -1][current.ypos].isWall === window.NOTWALL
+            && !window.tiledMap[current.xpos - 1][current.ypos].isOccupied()) {
+            neighbors.push(window.tiledMap[current.xpos - 1][current.ypos]);
         }
 
-        if (current.ypos -1 < 0 && tiledMap[current.xpos][current.ypos - 1].isWall === window.NOTWALL
-            && !tiledMap[current.xpos][current.ypos - 1].isOccupied()) {
-            neighbors.push(tiledMap[current.xpos][current.ypos - 1]);
+        if (current.ypos -1 >= 0 && window.tiledMap[current.xpos][current.ypos - 1].isWall === window.NOTWALL
+            && !window.tiledMap[current.xpos][current.ypos - 1].isOccupied()) {
+            neighbors.push(window.tiledMap[current.xpos][current.ypos - 1]);
         }
 
         return neighbors;
