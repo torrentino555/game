@@ -10,7 +10,7 @@ class Pathfinding {
     }
 
     possibleMoves() {
-        while (!this.frontier.empty()) {
+        while (this.frontier.length > 0) {
             let current = this.frontier.shift();
             if(this.distance.get(current) === this.sender.movePoint) {
                 break;

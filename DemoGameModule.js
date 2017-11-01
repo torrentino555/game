@@ -39,6 +39,7 @@ class DemoGameModule {
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
         window.ActiveEntity(this.activeUnit);
+        this.sendPossibleMoves();
     }
 
 
