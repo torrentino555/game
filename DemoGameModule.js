@@ -128,9 +128,6 @@ class DemoGameModule {
     makeDamage(action) {
         let woundedEnemies = [];
         let deadEnemies = [];
-        console.log(action.sender.getInhabitant().name + " make damage to " + action.target.getInhabitant().name);
-        console.log("this is damage: " + action.ability.name);
-        console.log("health begin: " + action.target.getInhabitant().healthpoint);
         //AOE DAMAGE
         if(action.ability.typeOfArea === "circle") {
             console.log("THIS IS AOE DAMAGE");
@@ -147,7 +144,6 @@ class DemoGameModule {
                             } else {
                                 woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
                             }
-                            console.log("health end: " + action.target.getInhabitant().healthpoint);
                         }
                     }
 
@@ -165,7 +161,6 @@ class DemoGameModule {
         }
 
         if (deadEnemies.length > 0) {
-            console.log(action.target.getInhabitant().name + " IS DEAD");
             window.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
             this.initiativeLine.RemoveUnit(action.target.getInhabitant());
             //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);

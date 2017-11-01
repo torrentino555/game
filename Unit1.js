@@ -138,6 +138,4 @@ class Unit {
         unit.healthpoint[0] = unit.healthpoint[1];
     }
   }
-
-
 }
