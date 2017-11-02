@@ -268,8 +268,10 @@ function MoveEntity(now, time, timeA, start, dest, id, deltaT) {
   let deltaTime = now - time;
   if (deltaTime > timeA) {
     getObj(id).setTrans(dest);
+    SortObjects();
   } else {
     getObj(id).setTrans (deltaTrasn(start, deltaT, deltaTime, timeA));
+    SortObjects();
     requestAnimationFrame(MoveEntity.bind(this, performance.now(), time, timeA, start, dest, id, deltaT));
   }
 }
@@ -312,11 +314,12 @@ function RemoveUnitsInInitiativeLine(units) {
   stateAnimationOnLowbar = true;
   units.forEach(function(unit) {
     lowbarUnits.splice(lowbarUnits.indexOf(unit), 1);
-    DeleteEntity(unit.entity.lowbarId);
+    setTimeout(function() {
+      DeleteEntity(unit.entity.lowbarId);
+    }, 500);
   });
   lowbarUnits.forEach(function(unit, i) {
-    let t = Utils.transOnLowbar(i);
-    StartAnimation(getObj(unit.entity.lowbarId).getTrans(), t, 0.5, unit.entity.lowbarId);
+    StartAnimation(getObj(unit.entity.lowbarId).getTrans(), Utils.transOnLowbar(i), 0.5, unit.entity.lowbarId);
   });
   setTimeout(function() { stateAnimationOnLowbar = false;}, 600);
 }
@@ -326,6 +329,10 @@ function DeleteEntity(index) {
 }
 
 function SortObjects() {
+  lowbarUnits.forEach(function(unit) {
+    getObj(unit.entity.mapId).order = unit.ypos;
+    getObj(unit.entity.healthbarId).order = unit.ypos;
+  });
   DrawObjects.sort(function(a, b) {
     if (a.order > b.order) return 1;
     return -1;
