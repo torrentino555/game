@@ -28,13 +28,8 @@ class DemoGameModule {
         //отрисовка персонажей
 
         for (let i = 0; i < window.PARTYSIZE + window.ENEMIESSIZE; i++) {
-          if (i == 0) {
-            window.AddEntity(this.initiativeLine.CurrentUnit());
-          } else {
-            window.AddEntity(this.initiativeLine.NextUnit());
-          }
+            window.AddEntity(this.initiativeLine.queue[i]);
         }
-        this.initiativeLine.NextUnit();
 
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
@@ -94,12 +89,12 @@ class DemoGameModule {
         let allMoves = pathfinding.possibleMoves();
         let path = [];
         let currentTile = action.target;
-        path.push({ xpos: action.target.xpos, ypos: action.target.ypos});
+        path.push(currentTile);
         while (allMoves.get(currentTile) !== null) {
+            console.log("current tile - [" + currentTile.xpos + "]" + "[" + currentTile.ypos + "]");
             path.push(allMoves.get(currentTile));
             currentTile = allMoves.get(currentTile);
         }
-        path.pop();
         window.movingTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
@@ -153,13 +148,15 @@ class DemoGameModule {
                         if(window.tiledMap[i][j].isOccupied()) {
                             console.log(window.tiledMap[i][j].getInhabitant().name + " IS WOUNDED");
                             action.sender.getInhabitant().useDamageSkill(window.tiledMap[i][j].getInhabitant(), action.ability);
-                            if(window.tiledMap[i][j].getInhabitant().isDead()) {
-                                deadEnemies.push(window.tiledMap[i][j].getInhabitant());
-                            } else {
-                                woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
+                            if(window.tiledMap[i][j].getInhabitant().deadMark === false) {
+                                if (window.tiledMap[i][j].getInhabitant().isDead()) {
+                                    deadEnemies.push(window.tiledMap[i][j].getInhabitant());
+                                    window.tiledMap[i][j].getInhabitant().deadMark = true;
+                                } else {
+                                    woundedEnemies.push(window.tiledMap[i][j].getInhabitant());
+                                }
+                                //console.log("health end: " + action.target.getInhabitant().healthpoint);
                             }
-                            //console.log("health end: " + action.target.getInhabitant().healthpoint);
-
                         }
                     }
 
@@ -205,22 +202,22 @@ class DemoGameModule {
     }
 
     static generatePlayers() {
-    let newPlayers = [];
-    let Roderick = new Unit();
-    Roderick.makeWarrior("Roderick");
-    let Gendalf = new Unit();
-    Gendalf.makeMage("Gendalf");
-    let Garreth = new Unit();
-    Garreth.makeThief("Garreth");
-    let Ethelstan = new Unit();
-    Ethelstan.makePriest("Ethelstan");
+        let newPlayers = [];
+        let Roderick = new Unit();
+        Roderick.makeWarrior("Roderick");
+        let Gendalf = new Unit();
+        Gendalf.makeMage("Gendalf");
+        let Garreth = new Unit();
+        Garreth.makeThief("Garreth");
+        let Ethelstan = new Unit();
+        Ethelstan.makePriest("Ethelstan");
 
-    newPlayers.push(Roderick);
-    newPlayers.push(Gendalf);
-    newPlayers.push(Garreth);
-    newPlayers.push(Ethelstan);
+        newPlayers.push(Roderick);
+        newPlayers.push(Gendalf);
+        newPlayers.push(Garreth);
+        newPlayers.push(Ethelstan);
 
-    return newPlayers;
+        return newPlayers;
     }
 
     static generateEnemies() {
@@ -228,7 +225,7 @@ class DemoGameModule {
         for (let i = 0; i < window.ENEMIESSIZE; i++) {
             let Skeleton = new Unit();
             let texture;
-            if (i < window.ENEMIESSIZE / 2) {
+            if (i % 2 === 0) {
                 texture = "skeleton1";
             } else {
                 texture = "skeleton2";

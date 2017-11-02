@@ -21,6 +21,7 @@ class Unit {
     this.lineId = 0;
     this.shooter = false;
     this.skills[0].createSkill("Move", "Move to this position", "point", 1, [0,0], 0);
+    this.deadMark = false;
   }
 
 
