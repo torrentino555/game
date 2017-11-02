@@ -33,4 +33,8 @@ class Utils {
   static transOnLowbar(i) {
     return [-0.55 + 0.005 + i*0.1, -0.79 - 0.01];
   }
+
+  static transForHealthbar(unit) {
+    return [-0.6 + 0.003 + unit.xpos*(1.2/16), 0.85 - unit.ypos*(1.2/16)*16/9 + (1.2/17)*ratio];
+  }
 }
