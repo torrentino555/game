@@ -3,7 +3,7 @@
 WIDTH = 16;
 HEIGHT = 12;
 PARTYSIZE = 4;
-ENEMIESSIZE = 3;
+ENEMIESSIZE = 7;
 NOTWALL = 0;
 WALL = 1;
 
@@ -94,11 +94,13 @@ class DemoGameModule {
         let allMoves = pathfinding.possibleMoves();
         let path = [];
         let currentTile = action.target;
+        path.push({ xpos: action.target.xpos, ypos: action.target.ypos});
         while (allMoves.get(currentTile) !== null) {
             path.push(allMoves.get(currentTile));
             currentTile = allMoves.get(currentTile);
-            window.movingTo(action.sender, path);
         }
+        path.pop();
+        window.movingTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
         this.activeUnit.xpos = action.target.xpos;
