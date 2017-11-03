@@ -12,7 +12,7 @@ class Pathfinding {
     possibleMoves() {
         while (this.frontier.length > 0) {
             let current = this.frontier.shift();
-            if(this.distance.get(current) === this.sender.movePoint) {
+            if(this.distance.get(current) === this.sender.speed) {
                 break;
             }
             let currentNeighbors = this.tileNeighbors(current);
