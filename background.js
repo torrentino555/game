@@ -43,11 +43,13 @@ class background {
     this.AddDrawObject([-0.9, 0.85], this.textures[3], Utils.madeRectangle(0, 0, 0.2, -0.6)); // часы
     this.AddDrawObject([-0.6, 0.85], this.textures[4], Utils.madeRectangle(0, 0, 1.2, -(1.2 / 16) * 12 * this.ratio), true,
       Utils.madeRectangle(0.008, 0.01, 0.990, 0.992)); // сетка
+    this.AddDrawObject([-0.55, -0.79], this.textures[5], Utils.madeRectangle(0, 0, 1.1, -0.1*this.ratio)); // lowbar
+    this.AddDrawObject([-0.63, -0.80], this.textures[6], Utils.madeRectangle(0, 0, 0.1, -0.17), true); // стрелочка
   }
 
   render() {
     let Loader = new loader(['textures/wall.jpg', 'textures/grass.jpg', 'textures/background.png',
-      'textures/hourglass.png', 'textures/grid.png']);
+      'textures/hourglass.png', 'textures/grid.png', 'textures/initiativeLine.png', 'textures/arrow.png'], this.gl);
     Loader.load(this.onLoad.bind(this));
   }
 
@@ -68,11 +70,6 @@ class background {
     Utils.resize(this.gl);
     this.gl.clearColor(0, 0, 0, 0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
 
     this.DrawObjects.forEach(function(item) {
       item.render();
