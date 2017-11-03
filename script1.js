@@ -135,11 +135,15 @@ function movingTo(TileStart, path) {
   stateAnimationOnMap = true;
 
   let unit = TileStart.unitOnTile;
-  for (let i = path.length - 2; i >= 0; i--) {
-    setTimeout(function() {
-      MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
-      MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
-    }, 200*(path.length - 2 - i));
+  for (let i = path.length - 1; i >= 0; i--) {
+    if (i == path.length - 1) {
+      MoveAnimation(Utils.translationForUnits(unit), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
+    } else {
+      setTimeout(function() {
+        MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
+        MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
+      }, 200*(path.length - 1 - i));
+    }
   }
   let transActiveTile = getObj(activeTile).getTrans();
   setTimeout(function() {
@@ -423,8 +427,10 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
 
 function showPossibleMoves(path) {
   for (let i = 0; i < path.length; i++) {
-    possibleMoves.push(AddDrawObject(-1, Utils.translationOnMap(path[i]), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)));
+    console.log(path[i].xpos + " " + path[i].ypos);
+    possibleMoves.push(AddDrawObject(0, Utils.translationOnMap(path[i].ypos, path[i].xpos), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)));
   }
+  SortObjects();
 }
 
 function setTranslation(index, x) {
