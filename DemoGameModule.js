@@ -311,6 +311,7 @@ class DemoGameModule {
         for(let key of allMoves.keys()){
             path.push(key);
         }
+        path.shift();
         window.showPossibleMoves(path);
     }
 
