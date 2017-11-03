@@ -41,6 +41,13 @@ class DrawObject {
     this.needRender = true;
   }
 
+  setTexCoord(coord) {
+    this.attributes[1].data = coord;
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.attributes[1].buffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.attributes[1].data), this.gl.STATIC_DRAW);
+    this.needRender = true;
+  }
+
   setTrans(translation) {
     this.uniforms[0].value = translation;
     this.needRender = true;
@@ -71,7 +78,7 @@ class DrawObject {
     }.bind(this));
 
     if (this.texture) {
-      this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, this.texture);
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
     }
 
     if (this.blend) {

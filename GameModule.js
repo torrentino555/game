@@ -14,15 +14,15 @@ class GameModule {
     this.game = new DemoGameModule();
   }
 
-  gameStart(context) {
-    context.game.gamePrepare();
-    context.game.startGameLoop();
+  gameStart() {
+    this.game.gamePrepare();
+    this.game.startGameLoop();
   }
 
   gameGraphic() {
     let back = new background(tiledMap);
     back.render();
     console.log("GameGraphic");
-    window.StartGraphic(this.gameStart, this);
+    window.StartGraphic(this.gameStart.bind(this));
   }
 }
