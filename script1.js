@@ -134,11 +134,11 @@ function movingTo(TileStart, path) {
   }
   stateAnimationOnMap = true;
     let unit = TileStart.unitOnTile;
-    for (let i = path.length - 2; i >= 0; i--) {
+    for (let i = path.length - 1; i >= 0; i--) {
       setTimeout(function() {
         MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
         MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
-      }, 200*(path.length - 2 - i));
+      }, 200*(path.length - 1 - i));
     }
     let transActiveTile = getObj(activeTile).getTrans();
     setTimeout(function() {
