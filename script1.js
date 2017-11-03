@@ -156,12 +156,14 @@ function movingTo(TileStart, path) {
 
 function Thunderbolt(TileStart, TileDest) {
   let DestT = Utils.translationForUnits(TileDest.unitOnTile);
-  let thunderbolt = AddDrawObject(12, Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[34], Utils.madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
+  let thunderbolt = AddDrawObject(12, Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[34], Utils.madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true,
+    Utils.madeRectangle(0, 0, 1/9, -1/8));
   FrameAnimation(thunderbolt, 2, 64, 9, 8, true);
 }
 
 function Fireball(TileStart, TileDest) {
-  let fireball = AddDrawObject(12, Utils.translationOnMap(TileStart.ypos, TileDest.xpos), images[32], Utils.madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
+  let fireball = AddDrawObject(12, Utils.translationOnMap(TileStart.ypos, TileDest.xpos), images[32], Utils.madeRectangle(0, 0, 0.06, -0.06 * ratio), true,
+    Utils.madeRectangle(0, 0, 1/6, -1/6));
   FrameAnimation(fireball, 2, 32, 6, 6, true);
   MoveAnimation(Utils.translationForUnits(TileStart), Utils.translationOnMap(TileDest.ypos, TileDest.xpos),
   2, fireball);
@@ -319,6 +321,9 @@ function ActiveEntity(unit) {
         };
         ul.appendChild(li);
       };
+      if (!elem.active) {
+        return;
+      }
       if (elem.isOccupied() && elem.unitOnTile.type == unit.type) {
         console.log("Союзник");
         unit.skills.forEach(function(item, i) {
@@ -426,9 +431,18 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
 }
 
 function showPossibleMoves(path) {
+  for (let i = 0; i < possibleMoves.length; i++) {
+    window.tiledMap[possibleMoves[i].xpos][possibleMoves[i].ypos].active = false;
+    DeleteEntity(possibleMoves[i].id);
+  }
+  possibleMoves = [];
   for (let i = 0; i < path.length; i++) {
-    console.log(path[i].xpos + " " + path[i].ypos);
-    possibleMoves.push(AddDrawObject(0, Utils.translationOnMap(path[i].ypos, path[i].xpos), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)));
+    possibleMoves.push({
+      id: AddDrawObject(-2, Utils.translationOnMap(path[i].ypos, path[i].xpos), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)),
+      xpos: path[i].xpos,
+      ypos: path[i].ypos
+    });
+    window.tiledMap[path[i].xpos][path[i].ypos].active = true;
   }
   SortObjects();
 }
@@ -447,18 +461,15 @@ function InitEvents() {
     if (x >= 0.2 && x <= 0.8 && y >= 0.065 && y <= 0.865 && document.getElementById('menu').hasAttribute('hidden') && !stateAnimationOnMap) {
       let i = Math.floor(((x - 0.2) / 0.6) / (1 / 16));
       let j = Math.floor(((y - 0.065) / 0.8) / (1 / 12));
-      if (window.tiledMap[i][j].isWall) {
-        setTranslation(activeElem[0], [-2, 3]);
-        activeElem[1] = -1;
-        activeElem[2] = -1;
-      } else if (activeElem[1] == -1 || activeElem[1] != i || activeElem[2] != j) {
+      if (window.tiledMap[i][j].active) {
         setTranslation(activeElem[0], Utils.translationOnMap(j, i));
         activeElem[1] = i;
         activeElem[2] = j;
+      } else {
+        setTranslation(activeElem[0], [-2, -2]);
+        activeElem[1] = -1;
+        activeElem[2] = -1;
       }
-    } else {
-      setTranslation(activeElem[0], [-2, 3]);
-      activeElem[1] = -1;
     }
   };
 }
@@ -468,8 +479,8 @@ function InitHtmlObjects() {
 }
 
 function InitGui() {
-  activeElem = [AddDrawObject(-1, [-2, 3], images[0], Utils.madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1];
-  activeTile = AddDrawObject(-1, [-2, 3], images[1], Utils.madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
+  activeElem = [AddDrawObject(-1, [-2, 3], images[35], Utils.madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio)), -1, -1];
+  activeTile = AddDrawObject(-0.9, [-2, 3], images[1], Utils.madeRectangle(0, 0, 1.2 / 16, -(1.2 / 16) * ratio));
 }
 
 function StartGame() {
@@ -529,7 +540,8 @@ function StartGraphic(callback) {
     'conditions/PriestAngry.png', 'conditions/PriestAttack.png', 'conditions/PriestDead.png',
     'conditions/Skeleton1Angry.png', 'conditions/Skeleton1Attack.png', 'conditions/Skeleton1Dead.png',
     'conditions/Skeleton2Angry.png', 'conditions/Skeleton2Attack.png', 'conditions/Skeleton2Dead.png',
-    'animations/fireball.png', 'animations/explosion.png', 'animations/thunderbolt1.png'
+    'animations/fireball.png', 'animations/explosion.png', 'animations/thunderbolt1.png',
+    'textures/select.png'
   ], gl);
   Loader.load(InitGraphic, callback);
 }
