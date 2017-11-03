@@ -34,7 +34,7 @@ class DemoGameModule {
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
         window.ActiveEntity(this.activeUnit);
-        //this.sendPossibleMoves();
+        this.sendPossibleMoves();
     }
 
 
@@ -63,7 +63,7 @@ class DemoGameModule {
                 }
 
                 if(this.activeUnit.actionPoint === 1) {
-                    //this.sendPossibleMoves();
+                    this.sendPossibleMoves();
                 }
             }
             console.log("action point: " + this.activeUnit.actionPoint);
@@ -321,7 +321,7 @@ class DemoGameModule {
         console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
         this.activeUnit.actionPoint = 2;
         window.ActiveEntity(this.activeUnit);
-        //this.sendPossibleMoves();
+        this.sendPossibleMoves();
         //изменяем LowerBar
         //изменяем activeEntity
     }
