@@ -133,6 +133,7 @@ function movingTo(TileStart, path) {
     return;
   }
   stateAnimationOnMap = true;
+
   let unit = TileStart.unitOnTile;
   for (let i = path.length - 2; i >= 0; i--) {
     setTimeout(function() {

@@ -89,12 +89,12 @@ class DemoGameModule {
         let allMoves = pathfinding.possibleMoves();
         let path = [];
         let currentTile = action.target;
-        path.push(currentTile);
         while (allMoves.get(currentTile) !== null) {
+            path.push(currentTile);
             console.log("current tile - [" + currentTile.xpos + "]" + "[" + currentTile.ypos + "]");
-            path.push(allMoves.get(currentTile));
             currentTile = allMoves.get(currentTile);
         }
+        console.log(path);
         window.movingTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
