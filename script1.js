@@ -15,6 +15,7 @@ let lowbar = 0;
 let lowbarUnits = [];
 let notFirstActive = false;
 let indexes = [];
+let possibleMoves = [];
 let countIndexes = 0;
 let stateAnimationOnMap = false;
 let stateAnimationOnLowbar = false;
@@ -124,7 +125,6 @@ function getObj(ind) {
   return DrawObjects[indexes[ind]];
 }
 
-
 function movingTo(TileStart, path) {
   if (stateAnimationOnMap) {
     setTimeout(function() {
@@ -133,20 +133,20 @@ function movingTo(TileStart, path) {
     return;
   }
   stateAnimationOnMap = true;
-    let unit = TileStart.unitOnTile;
-    for (let i = path.length - 2; i >= 0; i--) {
-      setTimeout(function() {
-        MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
-        MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
-      }, 200*(path.length - 2 - i));
-    }
-    let transActiveTile = getObj(activeTile).getTrans();
+  let unit = TileStart.unitOnTile;
+  for (let i = path.length - 2; i >= 0; i--) {
     setTimeout(function() {
-      if (transActiveTile == getObj(activeTile).getTrans()) {
-        getObj(activeTile).setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
-      }
-      stateAnimationOnMap = false;
-    }, 200*(path.length));
+      MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
+      MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
+    }, 200*(path.length - 2 - i));
+  }
+  let transActiveTile = getObj(activeTile).getTrans();
+  setTimeout(function() {
+    if (transActiveTile == getObj(activeTile).getTrans()) {
+      getObj(activeTile).setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
+    }
+    stateAnimationOnMap = false;
+  }, 200*(path.length));
 }
 
 function Thunderbolt(TileStart, TileDest) {
@@ -418,6 +418,12 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
     }, timer + 50, sender, target);
   }, 500);
 
+}
+
+function showPossibleMoves(path) {
+  for (let i = 0; i < path.length; i++) {
+    possibleMoves.push(AddDrawObject(-1, Utils.translationOnMap(path[i]), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)));
+  }
 }
 
 function setTranslation(index, x) {
