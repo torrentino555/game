@@ -15,6 +15,7 @@ let lowbar = 0;
 let lowbarUnits = [];
 let notFirstActive = false;
 let indexes = [];
+let possibleMoves = [];
 let countIndexes = 0;
 let stateAnimationOnMap = false;
 let stateAnimationOnLowbar = false;
@@ -124,7 +125,6 @@ function getObj(ind) {
   return DrawObjects[indexes[ind]];
 }
 
-
 function movingTo(TileStart, path) {
   if (stateAnimationOnMap) {
     setTimeout(function() {
@@ -133,39 +133,39 @@ function movingTo(TileStart, path) {
     return;
   }
   stateAnimationOnMap = true;
-    let unit = TileStart.unitOnTile;
-    for (let i = path.length - 1; i >= 0; i--) {
-      setTimeout(function() {
-        MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
-        MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
-      }, 200*(path.length - 1 - i));
-    }
-    let transActiveTile = getObj(activeTile).getTrans();
+
+  let unit = TileStart.unitOnTile;
+  for (let i = path.length - 2; i >= 0; i--) {
     setTimeout(function() {
-      if (transActiveTile == getObj(activeTile).getTrans()) {
-        getObj(activeTile).setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
-      }
-      stateAnimationOnMap = false;
-    }, 200*(path.length));
+      MoveAnimation(Utils.translationForUnits(path[i + 1]), Utils.translationForUnits(path[i]), 0.2, unit.entity.mapId);
+      MoveAnimation(Utils.transForHealthbar(path[i + 1]), Utils.transForHealthbar(path[i]), 0.2, unit.entity.healthbarId);
+    }, 200*(path.length - 2 - i));
+  }
+  let transActiveTile = getObj(activeTile).getTrans();
+  setTimeout(function() {
+    if (transActiveTile == getObj(activeTile).getTrans()) {
+      getObj(activeTile).setTrans(Utils.translationOnMap(unit.ypos, unit.xpos));
+    }
+    stateAnimationOnMap = false;
+  }, 200*(path.length));
 }
 
 function Thunderbolt(TileStart, TileDest) {
   let DestT = Utils.translationForUnits(TileDest.unitOnTile);
-  let thunderbolt = AddDrawObject(12, Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[109], Utils.madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
+  let thunderbolt = AddDrawObject(12, Utils.translationOnMap(TileDest.ypos, TileDest.xpos), images[34], Utils.madeRectangle(0, 0, 1.2/16, 1.2 - DestT[1]), true);
   FrameAnimation(thunderbolt, 2, 64, 9, 8, true);
 }
 
 function Fireball(TileStart, TileDest) {
-  let fireball = AddDrawObject(12, Utils.translationForUnits(TileStart), images[15], Utils.madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
+  let fireball = AddDrawObject(12, Utils.translationOnMap(TileStart.ypos, TileDest.xpos), images[32], Utils.madeRectangle(0, 0, 0.06, -0.06 * ratio), true);
   FrameAnimation(fireball, 2, 32, 6, 6, true);
   MoveAnimation(Utils.translationForUnits(TileStart), Utils.translationOnMap(TileDest.ypos, TileDest.xpos),
   2, fireball);
   setTimeout(function() {
-    let obj = [];
     for (let ii = TileDest.xpos - 2; ii < TileDest.xpos + 3; ii++) {
       for (let jj = TileDest.ypos - 2; jj < TileDest.ypos + 3; jj++) {
         if (ii >= 0 && ii < 16 && jj >= 0 && jj < 12) {
-          FrameAnimation(AddDrawObject(12, Utils.translationOnMap(jj, ii), images[46], Utils.madeRectangle(0, 0, 1 / 16, -(1 / 16) * ratio), true),
+          FrameAnimation(AddDrawObject(12, Utils.translationOnMap(jj, ii), images[33], Utils.madeRectangle(0, 0, 1 / 16, -(1 / 16) * ratio), true),
           1.2, 44, 6, 8, true);
         }
       }
@@ -251,9 +251,7 @@ function RemoveUnitsInInitiativeLine(units) {
   stateAnimationOnLowbar = true;
   units.forEach(function(unit) {
     lowbarUnits.splice(lowbarUnits.indexOf(unit), 1);
-    setTimeout(function() {
-      DeleteEntity(unit.entity.lowbarId);
-    }, 500);
+    DeleteEntity(unit.entity.lowbarId);
   });
   lowbarUnits.forEach(function(unit, i) {
     MoveAnimation(getObj(unit.entity.lowbarId).getTrans(), Utils.transOnLowbar(i), 0.5, unit.entity.lowbarId);
@@ -423,6 +421,12 @@ function unitAttackAndKill(nameSkill, sender, target, DeadUnits, wounded) {
 
 }
 
+function showPossibleMoves(path) {
+  for (let i = 0; i < path.length; i++) {
+    possibleMoves.push(AddDrawObject(-1, Utils.translationOnMap(path[i]), images[0], Utils.madeRectangle(0, 0, 1.2/16, -(1.2/16)*ratio)));
+  }
+}
+
 function setTranslation(index, x) {
   getObj(index).setTrans(x);
 }
@@ -519,7 +523,7 @@ function StartGraphic(callback) {
     'conditions/PriestAngry.png', 'conditions/PriestAttack.png', 'conditions/PriestDead.png',
     'conditions/Skeleton1Angry.png', 'conditions/Skeleton1Attack.png', 'conditions/Skeleton1Dead.png',
     'conditions/Skeleton2Angry.png', 'conditions/Skeleton2Attack.png', 'conditions/Skeleton2Dead.png',
-    'animations/fireball.png', 'animations/explosion.png', 'animations/thunderbolt.png'
+    'animations/fireball.png', 'animations/explosion.png', 'animations/thunderbolt1.png'
   ], gl);
   Loader.load(InitGraphic, callback);
 }
