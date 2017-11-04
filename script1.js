@@ -321,9 +321,9 @@ function ActiveEntity(unit) {
         };
         ul.appendChild(li);
       };
-      if (!elem.active) {
-        return;
-      }
+      // if (!elem.active) {
+      //   return;
+      // }
       if (elem.isOccupied() && elem.unitOnTile.type == unit.type) {
         console.log("Союзник");
         unit.skills.forEach(function(item, i) {
@@ -343,7 +343,7 @@ function ActiveEntity(unit) {
       } else {
         console.log("Карта")
         unit.skills.forEach(function(item, i) {
-          if (item.typeOfArea == "circle" || item.name == 'Move') {
+          if (item.typeOfArea == "circle" || (item.name == 'Move' && elem.active)) {
             console.log(item.name);
             func(item);
           }
