@@ -19,10 +19,8 @@ class Program {
 
   create() {
     let program = this.gl.createProgram();
-    let source1 = document.getElementById(this.vertexShader).text;
-    let source2 = document.getElementById(this.fragmentShader).text;
-    this.gl.attachShader(program , this.createShader(this.gl.VERTEX_SHADER, source1));
-    this.gl.attachShader(program , this.createShader(this.gl.FRAGMENT_SHADER, source2));
+    this.gl.attachShader(program , this.createShader(this.gl.VERTEX_SHADER, this.vertexShader));
+    this.gl.attachShader(program , this.createShader(this.gl.FRAGMENT_SHADER, this.fragmentShader));
     this.gl.linkProgram(program);
     let success = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
     if (success) {

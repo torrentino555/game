@@ -20,9 +20,9 @@ class GameModule {
   }
 
   gameGraphic() {
-    let back = new background(tiledMap);
+    let back = new Background(tiledMap);
     back.render();
-    console.log("GameGraphic");
-    window.StartGraphic(this.gameStart.bind(this));
+    gameManager = new GameManager();
+    gameManager.startGameRendering(this.gameStart.bind(this));
   }
 }
