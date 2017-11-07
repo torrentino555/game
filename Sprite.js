@@ -1,4 +1,4 @@
-class DrawObject {
+class Sprite {
   constructor(gl, program, attributes, uniforms, blend, texture) {
     this.gl = gl;
     this.program = program;

@@ -1,10 +1,8 @@
-// import Unit from "Unit.js";
-
 class Tile{
 	constructor() {
 		this.xpos = null;
 		this.ypos = null;
-		this.unitOnTile = new Unit();
+		this.unitOnTile = null;
 		this.isWall = null;
 	}
 
@@ -21,6 +19,6 @@ class Tile{
 	}
 
 	isOccupied(){
-		return this.unitOnTile === null;
+		return this.unitOnTile !== null;
 	}
 }

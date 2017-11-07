@@ -1,5 +1,3 @@
-'use strict';
-
 class Utils {
   static resize(gl) {
     let displayWidth = gl.canvas.clientWidth;
@@ -35,6 +33,6 @@ class Utils {
   }
 
   static transForHealthbar(unit) {
-    return [-0.6 + 0.003 + unit.xpos*(1.2/16), 0.85 - unit.ypos*(1.2/16)*16/9 + (1.2/17)*ratio];
+    return [-0.6 + 0.003 + unit.xpos*(1.2/16), 0.85 - unit.ypos*(1.2/16)*16/9 + (1.2/17)* ratio];
   }
 }

@@ -11,14 +11,14 @@ class Animation {
       now *= 0.001;
       let deltaTime = now - currentTime;
       if (deltaTime >= timeA) {
-        lowbarUnits.forEach((unit) => {
+        gameManager.unitManager.units.forEach((unit) => {
           gameManager.spriteManager.getSprite(unit.entity.mapId).order = unit.ypos;
           gameManager.spriteManager.getSprite(unit.entity.healthbarId).order = unit.ypos;
         });
         gameManager.spriteManager.sortSprites();
       } else {
         gameManager.spriteManager.getSprite(id).setTrans(Animation.deltaTrans(start, deltaT, deltaTime, timeA));
-        lowbarUnits.forEach((unit) => {
+        gameManager.unitManager.units.forEach((unit) => {
           gameManager.spriteManager.getSprite(unit.entity.mapId).order = unit.ypos;
           gameManager.spriteManager.getSprite(unit.entity.healthbarId).order = unit.ypos;
         });

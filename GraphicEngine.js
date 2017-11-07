@@ -11,7 +11,8 @@ class GraphicEngine {
       this.render(performance.now());
     }.bind(this));
     this.programForSprite = new Program(this.gl, vertexShader, fragmentShader).create();
-    this.programForColorObj = new Program(this.gl, vertexShader1, fragmentShader1).create()
+    this.programForColorObj = new Program(this.gl, vertexShader1, fragmentShader1).create();
+    this.time = performance.now() + 1;
   }
 
   addSprite(translation, texture, vertexs, blend, texCoord) {
@@ -19,7 +20,7 @@ class GraphicEngine {
       new Attribute('a_texcoord', texCoord ? texCoord : Utils.madeRectangle(0, 0, 1, 1))
     ];
     let uniforms = [new Uniform('u_translation', translation)];
-    let sprite = new DrawObject(this.gl, this.programForSprite, attributes, uniforms, blend, texture);
+    let sprite = new Sprite(this.gl, this.programForSprite, attributes, uniforms, blend, texture);
     this.sprites.push(sprite);
     return this.sprites.length - 1;
   }
@@ -27,12 +28,19 @@ class GraphicEngine {
   addColorSprite(translation, vertexs, color, blend) {
     let attributes = [new Attribute('a_position', vertexs)];
     let uniforms = [new Uniform('u_translation', translation), new Uniform('u_color', color)];
-    let sprite = new DrawObject(this.gl, this.programForColorObj, attributes, uniforms, blend);
+    let sprite = new Sprite(this.gl, this.programForColorObj, attributes, uniforms, blend);
     this.sprites.push(sprite);
     return this.sprites.length - 1;
   }
 
   render(now) {
+    now *= 0.001;
+    let deltaTime = now - this.time;
+    this.time = now;
+    if (deltaTime != 0) {
+      document.getElementById('fps').innerHTML = (1 / deltaTime).toFixed(0);
+    }
+
     Utils.resize(this.gl);
     this.gl.clearColor(0, 0, 0, 0);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT);

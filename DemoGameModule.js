@@ -28,12 +28,12 @@ class DemoGameModule {
         //отрисовка персонажей
 
         for (let i = 0; i < window.PARTYSIZE + window.ENEMIESSIZE; i++) {
-            window.AddEntity(this.initiativeLine.queue[i]);
+            gameManager.unitManager.addUnit(this.initiativeLine.queue[i]);
         }
 
         this.activeUnit = this.initiativeLine.CurrentUnit();
         console.log(this.activeUnit.name + " - let's start with you!");
-        window.ActiveEntity(this.activeUnit);
+        gameManager.unitManager.activeUnit(this.activeUnit);
         this.sendPossibleMoves();
     }
 
@@ -95,7 +95,7 @@ class DemoGameModule {
             currentTile = allMoves.get(currentTile);
         }
         console.log(path);
-        window.movingTo(action.sender, path);
+        gameManager.animtaionManager.movingTo(action.sender, path);
         action.sender.unoccupy();
         action.target.occupy(toMove);
         this.activeUnit.xpos = action.target.xpos;
@@ -127,7 +127,7 @@ class DemoGameModule {
           healedAllies.push(action.target.getInhabitant());
           console.log("health end: " + action.target.getInhabitant().healthpoint);
         }
-        window.unitAttack(action.ability.name, action.sender, action.target, healedAllies);
+        gameManager.unitManager.unitAttack(action.ability.name, action.sender, action.target, healedAllies);
     }
 
     makeDamage(action) {
@@ -176,13 +176,13 @@ class DemoGameModule {
         if (deadEnemies.length > 0) {
            // console.log(action.target.getInhabitant().name + " IS DEAD");
 
-            window.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
+            gameManager.unitManager.unitAttackAndKill(action.ability.name, action.sender, action.target, deadEnemies, woundedEnemies);
             for(let i = 0; i < deadEnemies.length; i++) {
                 this.initiativeLine.RemoveUnit(deadEnemies[i]);
             }            //graph.deleteFromLowBar(action.target.getInhabitant().barIndex);
         } else {
             console.log("SOMEONE GET WOUNDED: ", woundedEnemies);
-            window.unitAttack(action.ability.name, action.sender, action.target, woundedEnemies);
+            gameManager.unitManager.unitAttack(action.ability.name, action.sender, action.target, woundedEnemies);
         }
     }
 
@@ -312,7 +312,7 @@ class DemoGameModule {
             path.push(key);
         }
         path.shift();
-        window.showPossibleMoves(path);
+        gameManager.unitManager.showPossibleMoves(path);
     }
 
     beginTurn() {
@@ -321,7 +321,7 @@ class DemoGameModule {
         console.log(this.initiativeLine.ShowEveryoneInLine());
         console.log(this.activeUnit.name + " = now your move! Cause initiative:" + this.activeUnit.initiative);
         this.activeUnit.actionPoint = 2;
-        window.ActiveEntity(this.activeUnit);
+        gameManager.unitManager.activeUnit(this.activeUnit);
         this.sendPossibleMoves();
         //изменяем LowerBar
         //изменяем activeEntity

@@ -26,9 +26,9 @@ class Background {
   }
 
   render() {
-    let Loader = new loader(['textures/wall.jpg', 'textures/grass.jpg', 'textures/background.png',
+    let loader = new Loader(['textures/wall.jpg', 'textures/grass.jpg', 'textures/background.png',
       'textures/hourglass.png', 'textures/grid.png', 'textures/initiativeLine.png', 'textures/arrow.png'], this.engine.gl);
-    Loader.load(this.onLoad.bind(this));
+    loader.load(this.onLoad.bind(this));
   }
 
   onLoad(textures) {

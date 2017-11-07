@@ -1,4 +1,4 @@
-class loader {
+class Loader {
   constructor(paths, gl) {
     this.gl = gl;
     this.paths = paths;
